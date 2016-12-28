@@ -1,8 +1,17 @@
-# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
-# ansible-playbook -C -i ~/Docs/git/sdp_ansible_cf/directory_hosts -e hosts=dev_centos_employee_directory  ~/Docs/git/ansible-playbooks/install_custom_schema.yml
+# run as: ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
 #
-# if necessary: ssh -t host "sudo yum -y install python-simplejson"
-# ssh -t host "sudo yum -y install python-simplejson"
+# assumes you have an [enterpriseldap] host group and variables defined most likely
+# in [enterpriseldap:vars] in your hosts file (-i above):
+#
+# [enterpriseldap:children]
+# host1
+# host2
+#
+# [enterpriseldap:vars]
+# schema_file= "72org-schema.ldif"
+# local_git_location="/var/tmp"
+# git_ldap_cf_dir="ssh://git.domain.org/git"
+# git_ldap_cf_repo="org_ldap_cf"
 ---
 - name: install custom schema
   hosts: enterpriseldap
