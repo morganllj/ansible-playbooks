@@ -1,0 +1,39 @@
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
+# ansible-playbook -C -i ~/Docs/git/sdp_ansible_cf/directory_hosts -e hosts=dev_centos_employee_directory  ~/Docs/git/ansible-playbooks/install_custom_schema.yml
+#
+# if necessary: ssh -t host "sudo yum -y install python-simplejson"
+# ssh -t host "sudo yum -y install python-simplejson"
+---
+- name: install custom schema
+  hosts: enterpriseldap
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+  - name: checkout repository containing schema
+    local_action:
+      git repo="{{ git_ldap_cf_dir }}/{{ git_ldap_cf_repo }}" dest="{{ local_git_location }}/{{ git_ldap_cf_repo }}" version=prod
+    become: no
+    run_once: true
+    register: repository_checked_out
+    check_mode: no
+  - name: check that schema file is available
+    local_action: stat path="{{ local_git_location }}/{{git_ldap_cf_repo}}/{{schema_file }}"
+    register: schemafile
+    become: no
+  - name: copy schema file into place on directory server
+    copy: 
+      backup: yes 
+      src: "{{ local_git_location }}/{{ git_ldap_cf_repo}}/{{ schema_file }}"
+      dest: "/etc/dirsrv/slapd-{{ ansible_hostname }}/schema/{{ schema_file }}"
+    register: schema_updated
+    when: (schemafile.stat.readable is defined and schemafile.stat.readable == true)
+  - name: restart slapd
+    service: name=dirsrv state=restarted
+    when: schema_updated.changed
+  - name: delete temp repository
+    local_action:
+      file path="{{ local_git_location }}/{{ git_ldap_cf_repo}}" state=absent
+    become: no
+    run_once: true
+    check_mode: no

@@ -1,0 +1,32 @@
+# ansible-playbook -i /path/to/zimbra_hosts -l stores  galsync.yml
+# for example:
+#     ansible-playbook -i ../sdp_ansible_cf/zimbra_hosts -l stores galsync.yml
+---
+- name: run galsync
+  hosts: stores
+  become: yes
+  become_user: zimbra
+  become_method: sudo
+  tasks:
+    - name: get host number
+      set_fact: hostnum={{ ansible_hostname[-2] }}{{ ansible_hostname[-1] }}
+    - name: run galsync
+      command: zmgsautil forcesync -a {{ hostnum }}{% raw %}@{% endraw %}domain.org -n InternalGal
+      async: 0
+      poll: 0
+      register: cat
+    - debug: var=cat.stdout_lines
+# copy schema files in place
+#
+#  - name: import users
+#    command: /usr/lib64/dirsrv/slapd-devldapm03/ldif2db -n userRoot -i /home1/user/devldapm01-userRoot.ldif
+#    async: 0
+#    poll: 0
+#    ignore_errors: true
+    
+#  - name: do something if in a group
+#    command: echo something here
+#    when: "{{ ansible_fqdn }} in dev_389_primary_masters"
+  # - name: do something else if in a group
+  #   command: echo something else here
+  #   when: "{{ ansible_fqdn }}" in 389devprimarymasters

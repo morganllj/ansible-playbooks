@@ -1,0 +1,10 @@
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
+---
+- name: yum update
+  hosts: sso
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - include: tasks/yum_update.yml
+    - include: tasks/reboot.yml

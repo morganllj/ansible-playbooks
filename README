@@ -1,0 +1,6 @@
+
+A collection of Ansible playbooks.
+
+This is still experimental as I'm still learning Ansible though the update_*.yml scripts work well and are already showing their worth.  The install_custom_schema.yml is also a huge time saver.
+
+Still works in progress are install_389.yml, prompting and zimbra  galsyncing.

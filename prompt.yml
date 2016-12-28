@@ -1,0 +1,15 @@
+# ansible-playbook -i /path/to/directory_hosts -l host  install_389.yml
+# for example:
+#     ansible-playbook -i ../sdp_ansible_cf/directory_hosts -l host  install_389.yml
+# if you want to reinstall, uninstall 389 on the host(s) first: ds_removal  -s host -w pass 
+---
+- name: install 389 directory server
+  hosts: dev_389
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: prompt for passwords
+      vars_prompt:
+          - name: "389_dm_pw"
+             prompt: "pass"

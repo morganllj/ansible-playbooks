@@ -1,0 +1,11 @@
+---
+- name: update sshd_config
+  lineinfile: dest=/etc/ssh/sshd_config line="{{ item }}" backup=yes insertafter="Banner" 
+  with_items:
+    - "Ciphers aes128-ctr,aes192-ctr,aes256-ctr"
+    - "MACs hmac-sha1,umac-64@openssh.com,hmac-ripemd160"
+  register: sshd_config
+- name: restart sshd
+  service: name=sshd state=restarted
+  when: sshd_config.changed
+      

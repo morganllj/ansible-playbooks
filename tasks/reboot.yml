@@ -1,0 +1,11 @@
+---
+- name: reboot machine
+  command: /sbin/init 6
+  when: (reboot.changed)
+  async: 0
+  poll: 0
+  ignore_errors: true
+- name: waiting for server to boot
+  local_action:
+    wait_for host={{ inventory_hostname }} port=22 delay=20 timeout=300
+  become: no
