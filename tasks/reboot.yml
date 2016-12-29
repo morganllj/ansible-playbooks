@@ -1,11 +1,17 @@
+# you must sleep and set async: 1 or some hosts will fail:
+# https://support.ansible.com/hc/en-us/articles/201958037-Reboot-a-server-and-wait-for-it-to-come-back
 ---
 - name: reboot machine
-  command: /sbin/init 6
-  when: (reboot.changed)
-  async: 0
+  shell: sleep 2 && /sbin/init 6
+  when: (reboot is defined and reboot.changed) or 
+            (manualreboot is defined and manualreboot)
+  async: 1
   poll: 0
   ignore_errors: true
 - name: waiting for server to boot
   local_action:
-    wait_for host={{ inventory_hostname }} port=22 delay=20 timeout=300
+    wait_for host={{ inventory_hostname }} port=22 delay=30 timeout=300 connect_timeout=15
   become: no
+  when: (reboot is defined and reboot.changed) or 
+            (manualreboot is defined and manualreboot)
+
