@@ -21,7 +21,7 @@
   tasks:
   - name: checkout repository containing schema
     local_action:
-      git repo="{{ git_ldap_cf_dir }}/{{ git_ldap_cf_repo }}" dest="{{ local_git_location }}/{{ git_ldap_cf_repo }}" version=prod
+      git repo="{{ git_ldap_cf_dir }}/{{ git_ldap_cf_repo }}" dest="{{ local_git_location }}/{{ git_ldap_cf_repo }}" version=master
     become: no
     run_once: true
     register: repository_checked_out
