@@ -3,7 +3,6 @@
 - name: update client rsyslog conf
   lineinfile: dest=/etc/rsyslog.conf line="{{ item }}" backup=yes
   with_items:
-    - "$ModLoad imfile"
     - "$InputFileName /var/log/dirsrv/slapd-{{ inventory_hostname | regex_replace('^([^.]*?)[.]', '\\1.') }}/{{ log_name }}"
     - "$InputFileTag {{ inventory_hostname | regex_replace('^([^l]+?)l.*', '\\1') }}dir{{ log_name }}"
     - "$InputFileStateFile stats_dir{{ log_name }}"
