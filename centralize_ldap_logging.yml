@@ -1,0 +1,23 @@
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
+---
+- name: centralize ldap logs
+  hosts: centosldap
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: update client rsyslog conf
+      lineinfile: dest=/etc/rsyslog.conf line="{{ item }}" backup=yes
+      with_items:
+        - "$ModLoad imfile"
+        - "$InputFileName /var/log/dirsrv/slapd-{{ inventory_hostname | regex_replace('^([^.]*?)[.]', '\\1.') }}/access"
+        - "$InputFileTag devdiracc"
+        - "$InputFileStateFile stats_diraccess"
+        - "$InputFileSeverity info"
+        - "$InputFileFacility local5"
+        - "$InputRunFileMonitor"
+        - "local5.* @@{{ rsyslog_server }}:10514"
+      register: rsyslogconf_updated
+    - name: restart rsyslogd
+      service: name=rsyslog state=restarted
+      when: rsyslogconf_updated.changed
