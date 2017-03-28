@@ -11,7 +11,7 @@
       with_items:
         - "$ModLoad imfile"
         - "$InputFileName /var/log/dirsrv/slapd-{{ inventory_hostname | regex_replace('^([^.]*?)[.]', '\\1.') }}/access"
-        - "$InputFileTag devdiracc"
+        - "$InputFileTag {{ inventory_hostname | regex_replace('^([^l]+?)l.*', '\\1') }}diracc"
         - "$InputFileStateFile stats_diraccess"
         - "$InputFileSeverity info"
         - "$InputFileFacility local5"
