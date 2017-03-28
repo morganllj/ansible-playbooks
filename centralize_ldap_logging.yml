@@ -6,18 +6,13 @@
   become_user: root
   become_method: sudo
   tasks:
-    - name: update client rsyslog conf
-      lineinfile: dest=/etc/rsyslog.conf line="{{ item }}" backup=yes
+    - include: tasks/ldap_log_entry.yml 
       with_items:
-        - "$ModLoad imfile"
-        - "$InputFileName /var/log/dirsrv/slapd-{{ inventory_hostname | regex_replace('^([^.]*?)[.]', '\\1.') }}/access"
-        - "$InputFileTag {{ inventory_hostname | regex_replace('^([^l]+?)l.*', '\\1') }}diracc"
-        - "$InputFileStateFile stats_diraccess"
-        - "$InputFileSeverity info"
-        - "$InputFileFacility local5"
-        - "$InputRunFileMonitor"
-        - "local5.* @@{{ rsyslog_server }}:10514"
-      register: rsyslogconf_updated
+        - "access"
+        - "errors"
+        - "audit"
+      loop_control:
+        loop_var: log_name
     - name: restart rsyslogd
       service: name=rsyslog state=restarted
       when: rsyslogconf_updated.changed
