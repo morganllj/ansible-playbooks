@@ -9,5 +9,12 @@
     - "$InputFileSeverity info"
     - "$InputFileFacility local5"
     - "$InputRunFileMonitor"
-    - "local5.* @@{{ rsyslog_server }}:10514"
+    - "local5.* @@{{ rsyslog_server_mgmt }}:10514"
   register: rsyslogconf_updated
+- name: update server rsyslog.conf
+  lineinfile: dest=/etc/rsyslog.conf line="{{ item }}" insertbefore="*.*\s+/var/log/catchall.log" backup=yes
+  with_items:
+    - ":syslogtag, isequal, \"prddiracc\" /var/log/dirsrv/auditprd"
+    - "&~"
+  register: server_rsyslogconf_updated
+  delegate_to: "{{ rsyslog_server }}"

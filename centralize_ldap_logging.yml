@@ -5,14 +5,13 @@
   become: yes
   become_user: root
   become_method: sudo
+  vars:
+    logs: ['access', 'errors', 'audit']
   tasks:
     - name: add modload
       lineinfile: dest=/etc/rsyslog.conf line="$ModLoad imfile" backup=yes
     - include: tasks/ldap_log_entry.yml 
-      with_items:
-        - "access"
-        - "errors"
-        - "audit"
+      with_items: "{{ logs }}"
       loop_control:
         loop_var: log_name
     - name: restart rsyslogd
