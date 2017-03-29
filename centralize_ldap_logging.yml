@@ -6,9 +6,14 @@
   become_user: root
   become_method: sudo
   vars:
-    ldap_env_type: "{{ inventory_hostname | regex_replace('^([^l]*?)l.*', '\\1') }}"
+    # be sure you have a :vars in your hosts.yml that sets ldap_env_type.  We use dev, test or "".
     short_hostname: "{{ inventory_hostname | regex_replace('^([^.]*?)[.].*', '\\1') }}"
+    rsyslog_work_dir: "/var/log/rsyslogWorkDirectory"
   tasks:
+    - name: create rsyslog working directory
+      file:
+        path: "{{ rsyslog_work_dir }}"
+        state: directory
     - name: update client rsyslog.conf
       template:
         src: directory_rsyslog.conf.j2
@@ -34,7 +39,7 @@
         marker: "# {mark} ANSIBLE MANAGED BLOCK {{ldap_env_type}}ldap"
       register: server_rsyslogconf_updated
       delegate_to: "{{ rsyslog_server }}"
-    - name: restart client rsyslog
+    - name: restart server rsyslog
       service: name=rsyslog state=restarted
       when: server_rsyslogconf_updated.changed
       delegate_to: "{{ rsyslog_server }}"

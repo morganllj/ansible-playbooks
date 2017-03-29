@@ -44,6 +44,7 @@ local7.*                                                /var/log/boot.log
 *.*                                                     @rsyslog1-back
 
 $ModLoad imfile
+$WorkDirectory	{{ rsyslog_work_dir }}
 
 $InputFileName /var/log/dirsrv/slapd-{{ short_hostname }}/access
 $InputFileTag {{ ldap_env_type }}diraccess
