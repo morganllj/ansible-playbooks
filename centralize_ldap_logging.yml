@@ -6,38 +6,25 @@
   become_user: root
   become_method: sudo
   vars:
-    logs: ['access', 'errors', 'audit']
+    ldap_env_type: "{{ inventory_hostname | regex_replace('^([^l]+?)l.*', '\\1') }}"
   tasks:
-    - name: add modload
-      lineinfile:
-        dest: /etc/rsyslog.conf
-        line: "$ModLoad imfile"
-        backup: yes
     - name: update client rsyslog.conf
+      template:
+        src: directory_rsyslog.conf.j2
+        dest: /etc/rsyslog.conf
+        mode: 0644
+        backup: yes
+    - name: update server rsyslog.conf
       blockinfile:
         dest: /etc/rsyslog.conf
+        insertbefore: "/var/log/catchall.log"
         backup: yes
         block: |
-          $InputFileName /var/log/dirsrv/slapd-{{ inventory_hostname | regex_replace('^([^.]*?)[.].*', '\1') }}/{{item}}
-          $InputFileTag {{ inventory_hostname | regex_replace('^([^l]+?)l.*', '\1') }}dir{{item}}
-          $InputFileStateFile stats_dir{{item}}
-          $InputFileSeverity info
-          $InputFileFacility local5
-          $InputRunFileMonitor
-          local5.* @@{{ rsyslog_server_mgmt }}:10514
-        marker: "# {mark} ANSIBLE MANAGED BLOCK {{item}}"
-        register: rsyslogconf_updated
-        with_items: "{{ logs }}"
-    # - name: update server rsyslog.conf
-    #   blockinfile:
-    #     dest: /etc/rsyslog.conf
-    #     insertbefore: "/var/log/catchall.log"
-    #     backup: yes
-    #     block: |
-    #       :syslogtag, isequal, "prddiracc" /var/log/dirsrv/auditprd
-    #       &~
-    #     register: server_rsyslogconf_updated
-    #     delegate_to: "{{ rsyslog_server }}"
-    # - name: restart rsyslogd
-    #   service: name=rsyslog state=restarted
-    #   when: rsyslogconf_updated.changed
+          :syslogtag, isequal,  {{ ldap_env_type }}diraccess /var/log/dirsrv/access
+          &~
+          :syslogtag, isequal,  {{ ldap_env_type }}direrrors /var/log/dirsrv/errorprd
+          &~
+          :syslogtag, isequal,  {{ ldap_env_type }}diraudit /var/log/dirsrv/auditprd
+          &~
+      register: server_rsyslogconf_updated
+      delegate_to: "{{ rsyslog_server }}"

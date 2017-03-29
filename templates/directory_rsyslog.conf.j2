@@ -1,0 +1,71 @@
+
+# THIS FILE IS MANAGED BY ANSIBLE--it comes from the ansible-playbooks
+# repository and will be overwritten the next time and update is made
+# from ansible.  The repository is here:
+# ssh://git.domain.net/export/git2repo/techops/ansible-playbooks
+
+
+# Use traditional timestamp format
+$ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
+
+# Provides kernel logging support (previously done by rklogd)
+$ModLoad imklog
+# Provides support for local system logging (e.g. via logger command)
+$ModLoad imuxsock
+
+# Log all kernel messages to the console.
+# Logging much else clutters up the screen.
+#kern.*                                                 /dev/console
+
+# Log anything (except mail) of level info or higher.
+# Don't log private authentication messages!
+*.info;mail.none;authpriv.none;cron.none                /var/log/messages
+
+# The authpriv file has restricted access.
+authpriv.*                                              /var/log/secure
+
+# Log all the mail messages in one place.
+mail.*                                                  -/var/log/maillog
+
+
+# Log cron stuff
+cron.*                                                  /var/log/cron
+
+# Everybody gets emergency messages
+*.emerg                                                 *
+
+# Save news errors of level crit and higher in a special file.
+uucp,news.crit                                          /var/log/spooler
+
+# Save boot messages also to boot.log
+local7.*                                                /var/log/boot.log
+
+# forward all to rsyslog
+*.*                                                     @rsyslog1-back
+
+$ModLoad imfile
+
+$InputFileName /var/log/dirsrv/slapd-{{ inventory_hostname | regex_replace('^([^.]*?)[.].*', '\\1') }}ldap01/access
+$InputFileTag {{ inventory_hostname | regex_replace('^([^l]+?)l.*', '\\1') }}diraccess
+$InputFileStateFile stats_diraccess
+$InputFileSeverity info
+$InputFileFacility local5
+$InputRunFileMonitor
+local5.* @@{{ rsyslog_server_mgmt }}:10514
+
+$InputFileName /var/log/dirsrv/slapd-{{ inventory_hostname | regex_replace('^([^.]*?)[.].*', '\\1') }}ldap01/errors
+$InputFileTag {{ inventory_hostname | regex_replace('^([^l]+?)l.*', '\\1') }}direrrors
+$InputFileStateFile stats_direrrors
+$InputFileSeverity info
+$InputFileFacility local5
+$InputRunFileMonitor
+local5.* @@{{ rsyslog_server_mgmt }}:10514
+
+$InputFileName /var/log/dirsrv/slapd-{{ inventory_hostname | regex_replace('^([^.]*?)[.].*', '\\1') }}ldap01/audit
+$InputFileTag {{ inventory_hostname | regex_replace('^([^l]+?)l.*', '\\1') }}diraudit
+$InputFileStateFile stats_diraudit
+$InputFileSeverity info
+$InputFileFacility local5
+$InputRunFileMonitor
+local5.* @@{{ rsyslog_server_mgmt }}:10514
+
