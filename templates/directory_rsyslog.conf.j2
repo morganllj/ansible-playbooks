@@ -52,7 +52,6 @@ $InputFileStateFile stats_diraccess
 $InputFileSeverity info
 $InputFileFacility local5
 $InputRunFileMonitor
-local5.* @@{{ rsyslog_server_mgmt }}:10514
 
 $InputFileName /var/log/dirsrv/slapd-{{ short_hostname }}/errors
 $InputFileTag {{ ldap_env_type }}direrrors
@@ -60,7 +59,6 @@ $InputFileStateFile stats_direrrors
 $InputFileSeverity info
 $InputFileFacility local5
 $InputRunFileMonitor
-local5.* @@{{ rsyslog_server_mgmt }}:10514
 
 $InputFileName /var/log/dirsrv/slapd-{{ short_hostname }}/audit
 $InputFileTag {{ ldap_env_type }}diraudit
@@ -68,5 +66,4 @@ $InputFileStateFile stats_diraudit
 $InputFileSeverity info
 $InputFileFacility local5
 $InputRunFileMonitor
-local5.* @@{{ rsyslog_server_mgmt }}:10514
 
