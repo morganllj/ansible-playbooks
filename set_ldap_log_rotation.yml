@@ -14,7 +14,7 @@
           values: "{{ item.value }}"
       with_items:
         - { attr: 'nsslapd-accesslog-logging-enabled', value: 'on'}
-        - { attr: 'nsslapd-accesslog-maxlogsperdir', value: '4' }
+        - { attr: 'nsslapd-accesslog-maxlogsperdir', value: '5' }
         - { attr: 'nsslapd-accesslog-logrotationsync-enabled', value: 'on' }
         - { attr: 'nsslapd-accesslog-logrotationsynchour', value: '3' }
         - { attr: 'nsslapd-accesslog-logrotationsyncmin', value: '0'}
@@ -26,7 +26,7 @@
         - { attr: 'nsslapd-accesslog-level', value: '256'}
         #
         - { attr: 'nsslapd-errorlog-logging-enabled', value: 'on'}
-        - { attr: 'nsslapd-errorlog-maxlogsperdir', value: '4' }
+        - { attr: 'nsslapd-errorlog-maxlogsperdir', value: '5' }
         - { attr: 'nsslapd-errorlog-logrotationsync-enabled', value: 'on' }
         - { attr: 'nsslapd-errorlog-logrotationsynchour', value: '3' }
         - { attr: 'nsslapd-errorlog-logrotationsyncmin', value: '0'}
@@ -37,7 +37,7 @@
         - { attr: 'nsslapd-errorlog-logexpirationtimeunit', value: 'day'}
         #
         - { attr: 'nsslapd-auditlog-logging-enabled', value: 'on' }
-        - { attr: 'nsslapd-auditlog-maxlogsperdir', value: '4' }
+        - { attr: 'nsslapd-auditlog-maxlogsperdir', value: '5' }
         - { attr: 'nsslapd-auditlog-logrotationsync-enabled', value: 'on' }
         - { attr: 'nsslapd-auditlog-logrotationsynchour', value: '3' }
         - { attr: 'nsslapd-auditlog-logrotationsyncmin', value: '0'}
