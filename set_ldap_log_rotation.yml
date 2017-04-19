@@ -3,53 +3,47 @@
 - name: set ldap log rotation
   hosts: centosldap
   tasks:
-    - name: set nsslapd-accesslog-maxlogsperdir
-      local_action: ldap_attr
-      args:
+    - name: set logging attrs
+      ldap_attr:
           bind_dn: "{{ ldap_bind_dn }}"
           bind_pw: "{{ ldap_bind_pw }}"
           server_uri: ldaps://{{ inventory_hostname }}
           dn: cn=config
-          name: nsslapd-accesslog-maxlogsperdir
+          name: "{{ item.attr }}"
           state: exact
-          values: 3
-    - name: set nsslapd-accesslog-logrotationsynchour
-      local_action: ldap_attr
-      args:
-          bind_dn: "{{ ldap_bind_dn }}"
-          bind_pw: "{{ ldap_bind_pw }}"
-          server_uri: ldaps://{{ inventory_hostname }}
-          dn: cn=config
-          name: nsslapd-accesslog-maxlogsperdir
-          state: exact
-          values: 3
-    - name: set nsslapd-accesslog-logrotationsyncmin
-      local_action: ldap_attr
-      args:
-          bind_dn: "{{ ldap_bind_dn }}"
-          bind_pw: "{{ ldap_bind_pw }}"
-          server_uri: ldaps://{{ inventory_hostname }}
-          dn: cn=config
-          name: nsslapd-accesslog-maxlogsperdir
-          state: exact
-          values: 0
-    - name: set nsslapd-accesslog-logexpirationtimeunit
-      local_action: ldap_attr
-      args:
-          bind_dn: "{{ ldap_bind_dn }}"
-          bind_pw: "{{ ldap_bind_pw }}"
-          server_uri: ldaps://{{ inventory_hostname }}
-          dn: cn=config
-          name: nsslapd-accesslog-maxlogsperdir
-          state: exact
-          values: day
-    - name: set nsslapd-accesslog-maxlogsize
-      local_action: ldap_attr
-      args:
-          bind_dn: "{{ ldap_bind_dn }}"
-          bind_pw: "{{ ldap_bind_pw }}"
-          server_uri: ldaps://{{ inventory_hostname }}
-          dn: cn=config
-          name: nsslapd-accesslog-maxlogsperdir
-          state: exact
-          values: -1
+          values: "{{ item.value }}"
+      with_items:
+        - { attr: 'nsslapd-accesslog-logging-enabled', value: 'on'}
+        - { attr: 'nsslapd-accesslog-maxlogsperdir', value: '4' }
+        - { attr: 'nsslapd-accesslog-logrotationsync-enabled', value: 'on' }
+        - { attr: 'nsslapd-accesslog-logrotationsynchour', value: '3' }
+        - { attr: 'nsslapd-accesslog-logrotationsyncmin', value: '0'}
+        - { attr: 'nsslapd-accesslog-logexpirationtimeunit', value: 'day'}
+        - { attr: 'nsslapd-accesslog-maxlogsize', value: '-1'}
+        - { attr: 'nsslapd-accesslog-logexpirationtime', value: '1'}
+        - { attr: 'nsslapd-accesslog-logrotationtime', value: '1'}
+        - { attr: 'nsslapd-accesslog-logexpirationtimeunit', value: 'day'}
+        - { attr: 'nsslapd-accesslog-level', value: '256'}
+        #
+        - { attr: 'nsslapd-errorlog-logging-enabled', value: 'on'}
+        - { attr: 'nsslapd-errorlog-maxlogsperdir', value: '4' }
+        - { attr: 'nsslapd-errorlog-logrotationsync-enabled', value: 'on' }
+        - { attr: 'nsslapd-errorlog-logrotationsynchour', value: '3' }
+        - { attr: 'nsslapd-errorlog-logrotationsyncmin', value: '0'}
+        - { attr: 'nsslapd-errorlog-logexpirationtimeunit', value: 'day'}
+        - { attr: 'nsslapd-errorlog-maxlogsize', value: '-1'}
+        - { attr: 'nsslapd-errorlog-logexpirationtime', value: '1'}
+        - { attr: 'nsslapd-errorlog-logrotationtime', value: '1'}
+        - { attr: 'nsslapd-errorlog-logexpirationtimeunit', value: 'day'}
+        #
+        - { attr: 'nsslapd-auditlog-logging-enabled', value: 'on' }
+        - { attr: 'nsslapd-auditlog-maxlogsperdir', value: '4' }
+        - { attr: 'nsslapd-auditlog-logrotationsync-enabled', value: 'on' }
+        - { attr: 'nsslapd-auditlog-logrotationsynchour', value: '3' }
+        - { attr: 'nsslapd-auditlog-logrotationsyncmin', value: '0'}
+        - { attr: 'nsslapd-auditlog-logexpirationtimeunit', value: 'day'}
+        - { attr: 'nsslapd-auditlog-maxlogsize', value: '-1'}
+        - { attr: 'nsslapd-auditlog-logexpirationtime', value: '1'}
+        - { attr: 'nsslapd-auditlog-logrotationtime', value: '1'}
+        - { attr: 'nsslapd-auditlog-logexpirationtimeunit', value: 'day'}
+      delegate_to: localhost
