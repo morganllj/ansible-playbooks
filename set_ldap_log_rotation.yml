@@ -13,4 +13,43 @@
           name: nsslapd-accesslog-maxlogsperdir
           state: exact
           values: 3
-
+    - name: set nsslapd-accesslog-logrotationsynchour
+      local_action: ldap_attr
+      args:
+          bind_dn: "{{ ldap_bind_dn }}"
+          bind_pw: "{{ ldap_bind_pw }}"
+          server_uri: ldaps://{{ inventory_hostname }}
+          dn: cn=config
+          name: nsslapd-accesslog-maxlogsperdir
+          state: exact
+          values: 3
+    - name: set nsslapd-accesslog-logrotationsyncmin
+      local_action: ldap_attr
+      args:
+          bind_dn: "{{ ldap_bind_dn }}"
+          bind_pw: "{{ ldap_bind_pw }}"
+          server_uri: ldaps://{{ inventory_hostname }}
+          dn: cn=config
+          name: nsslapd-accesslog-maxlogsperdir
+          state: exact
+          values: 0
+    - name: set nsslapd-accesslog-logexpirationtimeunit
+      local_action: ldap_attr
+      args:
+          bind_dn: "{{ ldap_bind_dn }}"
+          bind_pw: "{{ ldap_bind_pw }}"
+          server_uri: ldaps://{{ inventory_hostname }}
+          dn: cn=config
+          name: nsslapd-accesslog-maxlogsperdir
+          state: exact
+          values: day
+    - name: set nsslapd-accesslog-maxlogsize
+      local_action: ldap_attr
+      args:
+          bind_dn: "{{ ldap_bind_dn }}"
+          bind_pw: "{{ ldap_bind_pw }}"
+          server_uri: ldaps://{{ inventory_hostname }}
+          dn: cn=config
+          name: nsslapd-accesslog-maxlogsperdir
+          state: exact
+          values: -1
