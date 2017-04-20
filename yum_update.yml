@@ -1,13 +1,5 @@
 # ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
 ---
-# - name: yum update
-#   hosts: allzimbra
-#   become: yes
-#   become_user: root
-#   become_method: sudo
-#   tasks:
-#     -include: yum_update.yml
-#     -include: add_sshd_ciphers.yml 
 - name: yum update
   hosts: allhosts
   become: yes
