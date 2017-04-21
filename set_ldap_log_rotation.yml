@@ -36,7 +36,7 @@
         - { attr: 'nsslapd-errorlog-logrotationtime', value: '1'}
         - { attr: 'nsslapd-errorlog-logexpirationtimeunit', value: 'day'}
         #
-        - { attr: 'nsslapd-auditlog-logging-enabled', value: 'on' }
+        - { attr: 'nsslapd-auditlog-logging-enabled', value: 'off' }
         - { attr: 'nsslapd-auditlog-maxlogsperdir', value: '5' }
         - { attr: 'nsslapd-auditlog-logrotationsync-enabled', value: 'on' }
         - { attr: 'nsslapd-auditlog-logrotationsynchour', value: '3' }
