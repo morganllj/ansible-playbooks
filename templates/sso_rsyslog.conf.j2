@@ -1,0 +1,134 @@
+# Use traditional timestamp format
+$ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
+
+# Provides kernel logging support (previously done by rklogd)
+#$ModLoad imklog
+module(load="imklog")
+
+# Provides support for local system logging (e.g. via logger command)
+#$ModLoad imuxsock
+module(load="imuxsock")
+
+# imput file
+#$ModLoad imfile
+module(load="imfile")
+
+#### 4.1.6 of Nessus scan
+#$ModLoad imtcp.so
+module(load="imtcp.so")
+$InputTCPServerRun 514 
+
+# Log all kernel messages to the console.
+# Logging much else clutters up the screen.
+#kern.*                                                 /dev/console
+
+# Log anything (except mail) of level info or higher.
+# Don't log private authentication messages!
+*.info;mail.none;authpriv.none;cron.none                /var/log/messages
+
+# The authpriv file has restricted access.
+authpriv.*                                              /var/log/secure
+
+# Log all the mail messages in one place.
+mail.*                                                  -/var/log/maillog
+
+
+# Log cron stuff
+cron.*                                                  /var/log/cron
+
+# Everybody gets emergency messages
+#*.emerg                                                 *
+
+# Save news errors of level crit and higher in a special file.
+uucp,news.crit                                          /var/log/spooler
+
+# Save boot messages also to boot.log
+local7.*                                                /var/log/boot.log
+
+auth,user.*						/var/log/messages
+kern.*							/var/log/kern.log
+daemon.*						/var/log/daemon.log
+syslog.*						/var/log/syslog
+lpr,news,uucp,local0,local1,local2,local3,local4,local5	/var/log/unused.log
+
+
+
+# forward all to rsyslog
+*.* @{{ rsyslog_back_ip }}
+*.* @@{{ graylog_back_ip }}
+
+# A template to for higher precision timestamps + severity logging
+$template SpiceTmpl,"%TIMESTAMP%.%TIMESTAMP:::date-subseconds% %syslogtag% %syslogseverity-text%:%msg:::sp-if-no-1st-sp%%msg:::drop-last-lf%\n"
+
+:programname, startswith, "spice-vdagent"	/var/log/spice-vdagent.log;SpiceTmpl
+
+# so-cas-audit
+#$InputFileName /var/log/cas_audit.log
+#$InputFileTag sso-audit:
+#$InputFileStateFile stat-sso-cas-audit
+#$InputFileSeverity info
+#$InputFilePersistStateInterval 20000
+#$InputFileFacility local6
+#$InputRunFileMonitor
+
+# so-cas-audit New
+input(type="imfile"
+      File="/var/log/cas_audit.log"
+      Tag="sso-audit:"
+      Facility="local6"
+      Severity="info"
+      readMode="1")
+
+
+# sso-cas
+#$InputFileName /var/log/cas.log
+#$InputFileTag sso-cas:
+#$InputFileStateFile stat-sso-cas
+#$InputFileSeverity info
+#$InputFilePersistStateInterval 20000
+#$InputFileFacility local6
+#$InputRunFileMonitor
+
+# sso-cas New
+input(type="imfile"
+      File="/var/log/cas.log"
+      Tag="sso-cas:"
+      Facility="local6"
+      Severity="info"
+      readMode="1")
+
+
+# sso-perfstats
+#$InputFileName /var/log/perfstats.log
+#$InputFileTag sso-perfstats:
+#$InputFileStateFile stat-sso-cas-perfstats
+#$InputFileSeverity info
+#$InputFilePersistStateInterval 20000
+#$InputFileFacility local6
+#$InputRunFileMonitor
+
+# sso-perfstats New
+input(type="imfile"
+      File="/var/log/perfstatslog"
+      Tag="stat-sso-cas-perfstats"
+      Facility="local6"
+      Severity="info"
+      readMode="1")
+
+
+# sso-cas-tomcat-catlina-out
+#$InputFileName /opt/apache-tomcat/logs/catalina.out
+#$InputFileTag sso-tomcat-catalina-out:
+#$InputFileStateFile stat-sso-cas-catalina-out
+#$InputFileSeverity info
+#$InputFilePersistStateInterval 20000
+#$InputFileFacility local6
+#$InputRunFileMonitor
+
+# sso-cas-tomcat-catlina-out New
+input(type="imfile"
+      File="/opt/apache-tomcat/logs/catalina.out"
+      Tag="sso-tomcat-catalina-out:"
+      Facility="local6"
+      Severity="info"
+      readMode="1")
