@@ -1,0 +1,45 @@
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
+---
+- name: centralize sso logs
+  hosts: sso
+  become: yes
+  become_user: root
+  become_method: sudo
+  vars:
+    # be sure you have a :vars in your hosts.yml that sets ldap_env_type.  We use dev, test or "".
+    short_hostname: "{{ inventory_hostname | regex_replace('^([^.]*?)[.].*', '\\1') }}"
+    rsyslog_work_dir: "/var/log/rsyslogWorkDirectory"
+  tasks:
+    - name: create rsyslog working directory
+      file:
+        path: "{{ rsyslog_work_dir }}"
+        state: directory
+    - name: update client rsyslog.conf
+      template:
+        src: directory_rsyslog.conf.j2
+        dest: /etc/rsyslog.conf
+        mode: 0644
+        backup: yes
+      register: rsyslogconf_updated
+    - name: restart client rsyslog
+      service: name=rsyslog state=restarted
+      when: rsyslogconf_updated.changed
+    - name: update server rsyslog.conf
+      blockinfile:
+        dest: /etc/rsyslog.conf
+        insertbefore: "/var/log/catchall.log"
+        backup: yes
+        block: |
+          :syslogtag, isequal,  "{{ ldap_env_type }}diraccess" /var/log/dirsrv/access{{ ldap_env_type }}
+          &~
+          :syslogtag, isequal,  "{{ ldap_env_type }}direrrors" /var/log/dirsrv/errors{{ ldap_env_type }}
+          &~
+          :syslogtag, isequal,  "{{ ldap_env_type }}diraudit" /var/log/dirsrv/audit{{ ldap_env_type}}
+          &~
+        marker: "# {mark} ANSIBLE MANAGED BLOCK {{ldap_env_type}}ldap"
+      register: server_rsyslogconf_updated
+      delegate_to: "{{ rsyslog_server }}"
+    - name: restart server rsyslog
+      service: name=rsyslog state=restarted
+      when: server_rsyslogconf_updated.changed
+      delegate_to: "{{ rsyslog_server }}"
