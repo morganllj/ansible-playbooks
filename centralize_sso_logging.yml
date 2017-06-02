@@ -10,6 +10,21 @@
     short_hostname: "{{ inventory_hostname | regex_replace('^([^.]*?)[.].*', '\\1') }}"
     rsyslog_work_dir: "/var/log/rsyslogWorkDirectory"
   tasks:
+    # http://www.tomcatexpert.com/knowledge-base/rotating-catalinaout-log-files
+    - name: install epel
+      yum:
+        name: epel-release
+        state: present
+    - name: install cronolog
+      yum:
+        name: cronolog
+        state: present
+    - name: update catalina.sh
+      replace:
+        path: /opt/apache-tomcat/bin/catalina.sh
+        regexp: '>> "\$CATALINA_OUT" 2>&1 "&"'
+        replace: '2>&1 | /usr/sbin/cronolog "$CATALINA_BASE/logs/catalina-%Y%m%d.out" &'
+        backup: yes
     - name: create rsyslog working directory
       file:
         path: "{{ rsyslog_work_dir }}"
