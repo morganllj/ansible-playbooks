@@ -54,22 +54,13 @@ lpr,news,uucp,local0,local1,local2,local3,local4,local5	/var/log/unused.log
 
 
 # forward all to rsyslog
-*.* @{{ rsyslog_back_ip }}
-*.* @@{{ graylog_back_ip }}
+*.* @{{ rsyslog_server_back_ip }}
+*.* @@{{ graylog_server_back_ip }}
 
 # A template to for higher precision timestamps + severity logging
 $template SpiceTmpl,"%TIMESTAMP%.%TIMESTAMP:::date-subseconds% %syslogtag% %syslogseverity-text%:%msg:::sp-if-no-1st-sp%%msg:::drop-last-lf%\n"
 
 :programname, startswith, "spice-vdagent"	/var/log/spice-vdagent.log;SpiceTmpl
-
-# so-cas-audit
-#$InputFileName /var/log/cas_audit.log
-#$InputFileTag sso-audit:
-#$InputFileStateFile stat-sso-cas-audit
-#$InputFileSeverity info
-#$InputFilePersistStateInterval 20000
-#$InputFileFacility local6
-#$InputRunFileMonitor
 
 # so-cas-audit New
 input(type="imfile"
@@ -79,16 +70,6 @@ input(type="imfile"
       Severity="info"
       readMode="1")
 
-
-# sso-cas
-#$InputFileName /var/log/cas.log
-#$InputFileTag sso-cas:
-#$InputFileStateFile stat-sso-cas
-#$InputFileSeverity info
-#$InputFilePersistStateInterval 20000
-#$InputFileFacility local6
-#$InputRunFileMonitor
-
 # sso-cas New
 input(type="imfile"
       File="/var/log/cas.log"
@@ -96,16 +77,6 @@ input(type="imfile"
       Facility="local6"
       Severity="info"
       readMode="1")
-
-
-# sso-perfstats
-#$InputFileName /var/log/perfstats.log
-#$InputFileTag sso-perfstats:
-#$InputFileStateFile stat-sso-cas-perfstats
-#$InputFileSeverity info
-#$InputFilePersistStateInterval 20000
-#$InputFileFacility local6
-#$InputRunFileMonitor
 
 # sso-perfstats New
 input(type="imfile"
@@ -115,20 +86,10 @@ input(type="imfile"
       Severity="info"
       readMode="1")
 
-
-# sso-cas-tomcat-catlina-out
-#$InputFileName /opt/apache-tomcat/logs/catalina.out
-#$InputFileTag sso-tomcat-catalina-out:
-#$InputFileStateFile stat-sso-cas-catalina-out
-#$InputFileSeverity info
-#$InputFilePersistStateInterval 20000
-#$InputFileFacility local6
-#$InputRunFileMonitor
-
 # sso-cas-tomcat-catlina-out New
 input(type="imfile"
       File="/opt/apache-tomcat/logs/catalina.out"
       Tag="sso-tomcat-catalina-out:"
+      Tag="{{ env_type}}ssocatalina"
       Facility="local6"
-      Severity="info"
-      readMode="1")
+      Severity="info")
