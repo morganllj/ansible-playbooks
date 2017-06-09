@@ -16,6 +16,7 @@
         name: epel-release
         state: present
     - name: install cronolog
+    # this will fail with -C if epel isn't installed.  It's okay, it will success once epel is installed
       yum:
         name: cronolog
         state: present
@@ -25,6 +26,10 @@
         regexp: '>> "\$CATALINA_OUT" 2>&1 "&"'
         replace: '2>&1 | /usr/sbin/cronolog "$CATALINA_BASE/logs/catalina-%Y-%m-%d.out" &'
         backup: yes
+      register: catalinash_updated
+    - name: restart tomcat
+      service: name=tomcat state=restarted
+      when: catalinash_updated.changed        
     - name: create rsyslog working directory
       file:
         path: "{{ rsyslog_work_dir }}"
