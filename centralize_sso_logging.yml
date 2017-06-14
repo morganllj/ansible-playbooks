@@ -28,7 +28,10 @@
         backup: yes
       register: catalinash_updated
     - name: restart tomcat
-      service: name=tomcat state=restarted
+      service:
+        name: tomcat
+        state: restarted
+        sleep: 5
       when: catalinash_updated.changed        
     - name: create rsyslog working directory
       file:
@@ -59,6 +62,5 @@
       service:
         name: rsyslog
         state: restarted
-        sleep: 5
       when: server_rsyslogconf_updated.changed
       delegate_to: "{{ rsyslog_server }}"
