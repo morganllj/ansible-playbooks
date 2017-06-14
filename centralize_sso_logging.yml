@@ -56,6 +56,9 @@
       register: server_rsyslogconf_updated
       delegate_to: "{{ rsyslog_server }}"
     - name: restart server rsyslog
-      service: name=rsyslog state=restarted
+      service:
+        name: rsyslog
+        state: restarted
+        sleep: 5
       when: server_rsyslogconf_updated.changed
       delegate_to: "{{ rsyslog_server }}"
