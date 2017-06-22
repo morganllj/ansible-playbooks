@@ -1,0 +1,20 @@
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
+---
+- name: install fixed zimbra tmp clearing cron job
+  hosts: zimbra
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: update client rsyslog.conf
+      template:
+        src: zmcleantmp_sdp.j2
+        dest: /usr/local/sbin/zmcleantmp_sdp.sh
+        mode: 0755
+        backup: yes
+    - name: add cron job
+      cron:
+        hour: 2
+        minute: 40
+        user: zimbra
+        job: /usr/local/sbin/zmcleantmp_sdp.sh
