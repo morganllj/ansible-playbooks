@@ -6,7 +6,7 @@
   become_user: root
   become_method: sudo
   tasks:
-    - name: update client rsyslog.conf
+    - name: install fixed zimbra shell script
       template:
         src: zmcleantmp_sdp.j2
         dest: /usr/local/sbin/zmcleantmp_sdp.sh
@@ -18,3 +18,4 @@
         minute: 40
         user: zimbra
         job: /usr/local/sbin/zmcleantmp_sdp.sh
+        name: "zmcleantmp_sdp"
