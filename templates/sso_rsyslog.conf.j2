@@ -95,6 +95,12 @@ input(type="imfile"
       Severity="info")
 
 input(type="imfile"
+      File="/opt/apache-tomcat/logs/localhost_access_log*txt"
+      Tag="{{ env_type}}ssolocalhost_access"
+      Facility="local6"
+      Severity="info")
+
+input(type="imfile"
       File="/opt/shibboleth-idp/logs/idp-process.log"
       Tag="{{ env_type}}ssoidp-process"
       Facility="local6"
