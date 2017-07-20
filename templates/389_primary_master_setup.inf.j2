@@ -1,7 +1,7 @@
 [General]
 AdminDomain = domain.net
 ConfigDirectoryAdminID = admin
-ConfigDirectoryAdminPwd = {{ 389_dir_admin_pw }}
+ConfigDirectoryAdminPwd = {{ admin_pw }}
 ConfigDirectoryLdapURL = ldap://{{ ansible_fqdn }}:389/o=NetscapeRoot
 FullMachineName = {{ ansible_fqdn }}
 ServerRoot = /usr/lib64/dirsrv
@@ -10,7 +10,7 @@ SuiteSpotUserID = nobody
 [admin]
 Port = 9830
 ServerAdminID = admin
-ServerAdminPwd = {{ 389_admin_pw }}
+ServerAdminPwd = {{ admin_pw }}
 ServerIpAddress = 0.0.0.0
 SysUser = nobody
 [slapd]
@@ -19,7 +19,7 @@ AddSampleEntries = No
 HashedRootDNPwd = 
 InstallLdifFile = suggest
 RootDN = cn=Directory Manager
-RootDNPwd = {{ 389_dm_pw }}
+RootDNPwd = {{ dm_pw }}
 ServerIdentifier = {{ ansible_hostname }}
 ServerPort = 389
 SlapdConfigForMC = yes
