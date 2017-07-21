@@ -9,11 +9,11 @@
   become_user: root
   become_method: sudo
   tasks:
-    - name: install epel
+    - name: install epel packages
       yum:
         name: epel-release
         state: present
-    - name: install 389
+    - name: install 389 packages
       yum: name=389-ds state=present
     - name: set sysctl.conf
       sysctl:
