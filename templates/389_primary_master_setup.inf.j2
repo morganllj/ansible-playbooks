@@ -1,5 +1,5 @@
 [General]
-AdminDomain = domain.net
+AdminDomain = {{ ansible_domain }}
 ConfigDirectoryAdminID = admin
 ConfigDirectoryAdminPwd = {{ admin_pw }}
 ConfigDirectoryLdapURL = ldap://{{ ansible_fqdn }}:389/o=NetscapeRoot
