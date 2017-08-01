@@ -1,8 +1,8 @@
 [General]
 AdminDomain = {{ ansible_domain }}
-ConfigDirectoryAdminID = admin
+ConfigDirectoryAdminID = uid=admin,ou=Administrators,ou=TopologyManagement,o=NetscapeRoot
 ConfigDirectoryAdminPwd = {{ admin_pw }}
-ConfigDirectoryLdapURL = ldap://{{ ansible_fqdn }}:389/o=NetscapeRoot
+ConfigDirectoryLdapURL = ldap://{{ config_dir_host }}.{{ansible_domain}}:389/o=NetscapeRoot
 FullMachineName = {{ ansible_fqdn }}
 ServerRoot = /usr/lib64/dirsrv
 SuiteSpotGroup = nobody
@@ -22,9 +22,8 @@ RootDN = cn=Directory Manager
 RootDNPwd = {{ dm_pw }}
 ServerIdentifier = {{ ansible_hostname }}
 ServerPort = 389
-SlapdConfigForMC = yes
-Suffix = dc=domain,dc=org
-UseExistingMC = 0
+Suffix = {{ basedn }}
+UseExistingMC = {{ use_existing_mc }}
 bak_dir = /var/lib/dirsrv/slapd-{{ ansible_hostname }}/bak
 bindir = /usr/bin
 cert_dir = /etc/dirsrv/slapd-{{ ansible_hostname }}
