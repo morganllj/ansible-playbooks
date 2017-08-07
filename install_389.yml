@@ -3,8 +3,8 @@
 #     ansible-playbook -C -i ../sdp_ansible_cf/hosts.yml -l hostname  install_389.yml
 # if you want to reinstall, uninstall 389 on the host(s) first: ds_removal  -s ldap1 -w pass 
 ---
-- name: install 389 directory server
-  hosts: 389ldap
+- name: prep to install 389 directory server
+  hosts: 389ldap # there are additional plays below: update this below if you change it here
   become: yes
   become_user: root
   become_method: sudo
@@ -85,6 +85,18 @@
     - name: generate 389 install inf
       template: src=templates/389_primary_master_setup.inf.j2 dest=/var/tmp/389_{{ ansible_hostname }}.inf mode=0700
       when: installdir.stat.exists is defined and installdir.stat.exists == False
+
+- name: run 389 installer serially
+  hosts: 389ldap
+  become: yes
+  become_user: root
+  become_method: sudo
+  serial: 1
+  tasks:
+    - name: check if 389 DS is installed
+      stat: path=/etc/dirsrv/slapd-{{ ansible_hostname }}
+      register: installdir
+    - debug: var=installdir
     - name: install 389 directory
       command: setup-ds-admin.pl -s -f /var/tmp/389_{{ ansible_hostname }}.inf
       async: 0
@@ -92,10 +104,14 @@
       ignore_errors: true
       when: installdir.stat.exists is defined and installdir.stat.exists == False
       register: cat
-      run_once: true
-      connection: ssh
-      with_items: '{{play_hosts}}'
     - debug: var=cat.stdout_lines
+
+- name: cleanup install infs
+  hosts: 389ldap
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
     - name: delete 389 install inf
       file:
         path: /var/tmp/389_{{ ansible_hostname }}.inf
