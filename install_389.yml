@@ -72,12 +72,8 @@
       when: installdir.stat.exists is defined and installdir.stat.exists == False
     - name: set basedn
       set_fact: basedn="dc={{ ansible_domain | regex_replace("\.", ",dc=") }}"
-    # - name: check basedn
-    #   debug: var=basedn
     - name: set naming_value
       set_fact: naming_value="{{ ansible_domain | regex_replace("\..*", "") }}"
-    # - name: check naming_value
-    #   debug: var=naming_value
     - name: decide where to save config tree
       set_fact: use_existing_mc=0
       when:
@@ -96,7 +92,6 @@
     - name: check if 389 DS is installed
       stat: path=/etc/dirsrv/slapd-{{ ansible_hostname }}
       register: installdir
-    - debug: var=installdir
     - name: install 389 directory
       command: setup-ds-admin.pl -s -f /var/tmp/389_{{ ansible_hostname }}.inf
       async: 0
@@ -106,16 +101,16 @@
       register: cat
     - debug: var=cat.stdout_lines
 
-- name: cleanup install infs
-  hosts: 389ldap
-  become: yes
-  become_user: root
-  become_method: sudo
-  tasks:
-    - name: delete 389 install inf
-      file:
-        path: /var/tmp/389_{{ ansible_hostname }}.inf
-        state: absent
+# - name: cleanup install infs
+#   hosts: 389ldap
+#   become: yes
+#   become_user: root
+#   become_method: sudo
+#   tasks:
+#     - name: delete 389 install inf
+#       file:
+#         path: /var/tmp/389_{{ ansible_hostname }}.inf
+#         state: absent
 # copy schema files in place
 #
 #  - name: import users
