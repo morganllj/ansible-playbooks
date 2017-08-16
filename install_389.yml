@@ -100,17 +100,10 @@
       when: installdir.stat.exists is defined and installdir.stat.exists == False
       register: cat
     - debug: var=cat.stdout_lines
-
-# - name: cleanup install infs
-#   hosts: 389ldap
-#   become: yes
-#   become_user: root
-#   become_method: sudo
-#   tasks:
-#     - name: delete 389 install inf
-#       file:
-#         path: /var/tmp/389_{{ ansible_hostname }}.inf
-#         state: absent
+    - name: delete 389 install inf
+      file:
+        path: /var/tmp/389_{{ ansible_hostname }}.inf
+        state: absent
 # copy schema files in place
 #
 #  - name: import users
