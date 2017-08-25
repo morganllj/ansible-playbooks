@@ -1,0 +1,22 @@
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
+---
+- name: install cron to age logs
+  hosts: sso
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: add cas cron job
+      cron:
+        hour: 2
+        minute: 0
+        user: root
+        job: find /opt/apache-tomcat/logs -type f -mtime +7 -delete
+        name: "cas_log_aging"
+    - name: add shib cron job
+      cron:
+        hour: 2
+        minute: 10
+        user: root
+        job: find /opt/shibboleth-idp/logs -type f -mtime +7 -delete
+        name: "shib_log_aging"        

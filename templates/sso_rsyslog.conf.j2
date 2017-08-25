@@ -62,7 +62,7 @@ $template SpiceTmpl,"%TIMESTAMP%.%TIMESTAMP:::date-subseconds% %syslogtag% %sysl
 
 :programname, startswith, "spice-vdagent"	/var/log/spice-vdagent.log;SpiceTmpl
 
-# so-cas-audit New
+# sso-cas-audit
 input(type="imfile"
       File="/var/log/cas_audit.log"
       Tag="sso-audit:"
@@ -70,7 +70,7 @@ input(type="imfile"
       Severity="info"
       readMode="1")
 
-# sso-cas New
+# sso-cas
 input(type="imfile"
       File="/var/log/cas.log"
       Tag="sso-cas:"
@@ -78,7 +78,7 @@ input(type="imfile"
       Severity="info"
       readMode="1")
 
-# sso-perfstats New
+# sso-perfstats
 input(type="imfile"
       File="/var/log/perfstatslog"
       Tag="stat-sso-cas-perfstats"
@@ -86,10 +86,35 @@ input(type="imfile"
       Severity="info"
       readMode="1")
 
-# sso-cas-tomcat-catlina-out New
+# sso-cas-tomcat-catalina-out
 input(type="imfile"
       File="/opt/apache-tomcat/logs/catalina*.out"
       Tag="sso-tomcat-catalina-out:"
       Tag="{{ env_type}}ssocatalina"
       Facility="local6"
       Severity="info")
+
+input(type="imfile"
+      File="/opt/apache-tomcat/logs/localhost_access_log*txt"
+      Tag="{{ env_type}}ssolocalhost_access"
+      Facility="local6"
+      Severity="info")
+
+input(type="imfile"
+      File="/opt/shibboleth-idp/logs/idp-process.log"
+      Tag="{{ env_type}}ssoidp-process"
+      Facility="local6"
+      Severity="info")
+
+input(type="imfile"
+      File="/opt/shibboleth-idp/logs/idp-warn.log"
+      Tag="{{ env_type}}ssoidp-warn"
+      Facility="local6"
+      Severity="info")
+
+input(type="imfile"
+      File="/opt/shibboleth-idp/logs/idp-audit.log"
+      Tag="{{ env_type}}ssoidp-audit"
+      Facility="local6"
+      Severity="info")
+

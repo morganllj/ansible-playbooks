@@ -1,86 +1,109 @@
 # ansible-playbook -i /path/to/directory_hosts -l ldap1.domain.net  install_389.yml
 # for example:
-#     ansible-playbook -i ../sdp_ansible_cf/directory_hosts -l ldap1.domain.net  install_389.yml
+#     ansible-playbook -C -i ../sdp_ansible_cf/hosts.yml -l hostname  install_389.yml
 # if you want to reinstall, uninstall 389 on the host(s) first: ds_removal  -s ldap1 -w pass 
 ---
-- name: install 389 directory server
-  hosts: dev_389
+- name: prep to install 389 directory server
+  hosts: 389ldap # there are additional plays below: update this below if you change it here
   become: yes
   become_user: root
   become_method: sudo
+#  serial: 1
+  vars:
+    use_existing_mc: 1
   tasks:
-    - name: prompt for passwords
-       vars_prompt:
-          - name: "389_dm_pw"
-             prompt: "pass"
-             private: yes
-   - name: install 389
-     yum: name=389-ds state=present
-   - name: set sysctl.conf
-    sysctl: name={{ item.thing }} value={{ item.value }} ignoreerrors=yes
-    with_items:
-      - { thing: 'net.ipv4.tcp_keepalive_time', value: '300' }
-      - { thing: 'fs.file-max', value: '64000' }
-    register: sysctl
-  - name: update limits.conf
-    lineinfile: dest=/etc/security/limits.conf line="{{ item }}"
-    with_items:
-      - "*	-	nofile	8192"
-      - "nobody               soft        nofile          4096"
-      - "nobody               hard        nofile          63536"
-      - "nobody      soft      nproc      2047"
-      - "nobody      hard      nproc      16384"
-    register: limits
-  - name: restart machine
-    command: init 6
-    when: (limits.changed) or (sysctl.changed)
-    async: 0
-    poll: 0
-    ignore_errors: true
-  - name: waiting for server to boot
-    local_action: 
-      module: wait_for
-        host={{ inventory_hostname }}
-        port=22
-        delay=1
-        timeout=300
-    become: no  # no need to sudo to wait on a host remotely 
-  - name: check if 389 DS is installed
-    stat: path=/etc/dirsrv/slapd-{{ ansible_hostname }}
-    register: installdir
-  - name: selinux getsebool work-around for setup-ds-admin.pl
-    # https://fedorahosted.org/389/ticket/377 
-    lineinfile: dest=~/bin/getsebool create=yes mode=0755 line="{{ item }}"
-    with_items:
-      - "#!/bin/sh"
-      - "echo on"
-      - "exit 0"
-    when: installdir.stat.exists is defined and installdir.stat.exists == False
-  - name: selinux setsebool work-around for setup-ds-admin.pl
-    lineinfile: dest=~/bin/setsebool create=yes mode=0755 line="{{ item }}"
-    with_items:
-      - "#!/bin/sh"
-      - "echo on"
-      - "exit 0"
-    when: installdir.stat.exists is defined and installdir.stat.exists == False
-  - name: selinux semanage work-around for setup-ds-admin.pl
-    lineinfile: dest=~/bin/semanage create=yes mode=0755 line="{{ item }}"
-    with_items:
-      - "#!/bin/sh"
-      - "echo on"
-      - "exit 0"
-    when: installdir.stat.exists is defined and installdir.stat.exists == False
-   - name: generate 389 install inf
-    template: src=templates/389_primary_master_setup.inf.j2 dest=/var/tmp/389_{{ ansible_hostname }}.inf mode=0700
-    when: installdir.stat.exists is defined and installdir.stat.exists == False
-  - name: install 389 directory
-    command: setup-ds-admin.pl -s -f /var/tmp/389_{{ ansible_hostname }}.inf
-    async: 0
-    poll: 0
-    ignore_errors: true
-    when: installdir.stat.exists is defined and installdir.stat.exists == False
-    register: cat
-  - debug: var=cat.stdout_lines
+    - name: install epel packages
+      yum:
+        name: epel-release
+        state: present
+    - name: install 389 packages
+      yum: name=389-ds state=present
+    - name: set sysctl.conf
+      sysctl:
+        name: "{{ item.thing }}"
+        value: "{{ item.value }}"
+        ignoreerrors: yes
+      with_items:
+        - { thing: 'net.ipv4.tcp_keepalive_time', value: '300' }
+        - { thing: 'fs.file-max', value: '64000' }
+      register: reboot
+    - name: update limits.conf
+      lineinfile: dest=/etc/security/limits.conf line="{{ item }}"
+      with_items:
+        - "*	-	nofile	8192"
+        - "nobody               soft        nofile          4096"
+        - "nobody               hard        nofile          63536"
+        - "nobody      soft      nproc      2047"
+        - "nobody      hard      nproc      16384"
+      register: reboot
+    - include: tasks/reboot.yml
+    - name: waiting for server to boot
+      local_action: 
+        module: wait_for
+        host: "{{ inventory_hostname }}"
+        port: 22
+        delay: 1
+        timeout: 300
+      become: no  # no need to sudo to wait on a host remotely 
+    - name: check if 389 DS is installed
+      stat: path=/etc/dirsrv/slapd-{{ ansible_hostname }}
+      register: installdir
+    - name: selinux getsebool work-around for setup-ds-admin.pl
+      # https://fedorahosted.org/389/ticket/377 
+      lineinfile: dest=~/bin/getsebool create=yes mode=0755 line="{{ item }}"
+      with_items:
+        - "#!/bin/sh"
+        - "echo on"
+        - "exit 0"
+      when: installdir.stat.exists is defined and installdir.stat.exists == False
+    - name: selinux setsebool work-around for setup-ds-admin.pl
+      lineinfile: dest=~/bin/setsebool create=yes mode=0755 line="{{ item }}"
+      with_items:
+        - "#!/bin/sh"
+        - "echo on"
+        - "exit 0"
+      when: installdir.stat.exists is defined and installdir.stat.exists == False
+    - name: selinux semanage work-around for setup-ds-admin.pl
+      lineinfile: dest=~/bin/semanage create=yes mode=0755 line="{{ item }}"
+      with_items:
+        - "#!/bin/sh"
+        - "echo on"
+        - "exit 0"
+      when: installdir.stat.exists is defined and installdir.stat.exists == False
+    - name: set basedn
+      set_fact: basedn="dc={{ ansible_domain | regex_replace("\.", ",dc=") }}"
+    - name: set naming_value
+      set_fact: naming_value="{{ ansible_domain | regex_replace("\..*", "") }}"
+    - name: decide where to save config tree
+      set_fact: use_existing_mc=0
+      when:
+        - ansible_hostname == config_dir_host
+    - name: generate 389 install inf
+      template: src=templates/389_primary_master_setup.inf.j2 dest=/var/tmp/389_{{ ansible_hostname }}.inf mode=0700
+      when: installdir.stat.exists is defined and installdir.stat.exists == False
+
+- name: run 389 installer serially
+  hosts: 389ldap
+  become: yes
+  become_user: root
+  become_method: sudo
+  serial: 1
+  tasks:
+    - name: check if 389 DS is installed
+      stat: path=/etc/dirsrv/slapd-{{ ansible_hostname }}
+      register: installdir
+    - name: install 389 directory
+      command: setup-ds-admin.pl -s -f /var/tmp/389_{{ ansible_hostname }}.inf
+      async: 0
+      poll: 0
+      ignore_errors: true
+      when: installdir.stat.exists is defined and installdir.stat.exists == False
+      register: cat
+    - debug: var=cat.stdout_lines
+    - name: delete 389 install inf
+      file:
+        path: /var/tmp/389_{{ ansible_hostname }}.inf
+        state: absent
 # copy schema files in place
 #
 #  - name: import users

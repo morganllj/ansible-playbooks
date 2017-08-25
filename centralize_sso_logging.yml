@@ -55,6 +55,14 @@
         block: |
           :syslogtag, isequal,  "{{ env_type }}ssocatalina" /var/log/sso/catalina{{ env_type }}
           &~
+          :syslogtag, isequal,  "{{ env_type }}ssolocalhost_access" /var/log/sso/localhost_access{{ env_type }}
+          &~
+          :syslogtag, isequal,  "{{ env_type }}ssoidp-process" /var/log/sso/idp-process{{ env_type }}
+          &~
+          :syslogtag, isequal,  "{{ env_type }}ssoidp-warn" /var/log/sso/idp-warn{{ env_type }}
+          &~
+          :syslogtag, isequal,  "{{ env_type }}ssoidp-audit" /var/log/sso/idp-audit{{ env_type }}
+          &~
         marker: "# {mark} ANSIBLE MANAGED BLOCK {{ env_type }}sso"
       register: server_rsyslogconf_updated
       delegate_to: "{{ rsyslog_server }}"
