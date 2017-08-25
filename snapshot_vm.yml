@@ -1,0 +1,16 @@
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
+---
+- name: snapshot
+  hosts: all
+  tasks:
+    - name: create snapshot
+      vmware_guest_snapshot:
+        hostname: vsphere.domain.net
+        username: user@domain.org
+        password: pass
+        name: desthost.domain.org
+        folder: /folder
+        snapshot_name: ansiblesnap
+        description: ansiblesnapdesc
+        datacenter: SDP
+      delegate_to: host.domain.net
