@@ -1,0 +1,17 @@
+---
+- name: set facts
+  set_fact:
+    vm_pass: "{{ lookup('file', '~/Docs/.pass') }}"
+    vm_snap_name: "{{lookup('pipe','date +%Y%m%d%H%M%S')}}"
+    vm_user: "{{ lookup('env','USER') }}@{{ ansible_domain }}"
+- name: create/delete snapshot
+  vmware_guest_snapshot:
+    hostname: "{{ vmware_hostname }}"
+    username: "{{ vm_user }}"
+    password: "{{ vm_pass }}"
+    name: "{{ ansible_hostname }}.{{ ansible_domain }}"
+    folder: "{{ vmware_folder }}"
+    datacenter: "{{ vmware_datacenter }}"
+    snapshot_name: "{{ vm_snap_name }}"
+    state: "{{ vm_snap_state }}"
+  delegate_to: "{{ vmware_pyvmomi_hostname }}"

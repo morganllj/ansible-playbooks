@@ -1,0 +1,12 @@
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
+---
+- name: yum update
+  hosts: dev389ldap
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: set facts
+      set_fact:
+        vm_snap_state: remove_all
+    - include: tasks/vm_snapshot.yml
