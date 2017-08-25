@@ -1,7 +1,7 @@
 # ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
 ---
 - name: yum update
-  hosts: dev389ldap
+  hosts: all
   become: yes
   become_user: root
   become_method: sudo
