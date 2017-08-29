@@ -1,9 +1,22 @@
 
 A collection of Ansible playbooks.
 
-This is still experimental as I'm still learning Ansible though the update_*.yml scripts work well and are already showing their worth.  The install_custom_schema.yml is also a huge time saver.
+Some of this is a work in progress though most is working and useful.
 
-Still works in progress are install_389.yml, prompting and zimbra  galsyncing.
+Many playbooks depend on variables set in a hosts.yml, specified by -i per the example at the top of most of the playbooks.  
+
+Create a hosts.yml with at least one host list:
+
+[myhosts]
+host1.fqdn
+host2.fqdn
+
+And depending on the playbook you’ll need to define variables for myhosts:
+[myhosts:var]
+var1=value
+var2=anothervalue
+
+I will make a note to upload a sample hosts.yml
 
 sometimes needed on remote hosts:
 ssh -t host "sudo yum -y install python-simplejson"
