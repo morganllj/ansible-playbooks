@@ -1,5 +1,5 @@
 ---
-- name: set facts
+- name: set auth and snap name
   set_fact:
     vm_pass: "{{ lookup('file', '~/Docs/.pass') }}"
     vm_snap_name: "{{lookup('pipe','date +%Y%m%d%H%M%S')}}"

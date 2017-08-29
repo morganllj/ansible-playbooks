@@ -6,7 +6,7 @@
   become_user: root
   become_method: sudo
   tasks:
-    - name: set facts
+    - name: set vm_snap_state to present
       set_fact:
         vm_snap_state: present
     - include: tasks/vm_snapshot.yml
