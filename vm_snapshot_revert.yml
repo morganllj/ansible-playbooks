@@ -9,5 +9,5 @@
   tasks:
     - name: set vm_snap_state to present
       set_fact:
-        vm_snap_state: present
+        vm_snap_state: revert
     - include: tasks/vm_snapshot.yml

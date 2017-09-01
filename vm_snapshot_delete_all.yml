@@ -8,5 +8,5 @@
   tasks:
     - name: set vm_snap_state to remove_all
       set_fact:
-        vm_snap_state: absent
+        vm_snap_state: remove_all
     - include: tasks/vm_snapshot.yml

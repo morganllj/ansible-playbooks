@@ -1,10 +1,26 @@
 ---
-- name: set auth and snap name
+- name: set auth
   set_fact:
     vm_pass: "{{ lookup('file', '~/Docs/.pass') }}"
-    vm_snap_name: "{{lookup('pipe','date +%Y%m%d%H%M%S')}}"
     vm_user: "{{ lookup('env','USER') }}@{{ ansible_domain }}"
-- name: create/delete snapshot
+- name: set snap name
+  set_fact:
+    vm_snap_name: "{{lookup('pipe','date +%Y%m%d%H%M%S')}}"
+    when: vm_snap_name is undefined and vm_snap_state != "revert"
+- debug: msg="vm_snap_name {{ vm_snap_name }}  state {{ vm_snap_state }}"
+- name: shut down guest
+  shell: sleep 2 && /sbin/init 0
+  async: 1
+  poll: 0
+  ignore_errors: true
+  when: vm_snap_state == "present"
+- name: pause for server(s) to shut down
+  pause:
+    seconds: 8
+  become: no
+  delegate_to: localhost
+  when: vm_snap_state == "present"
+- name: create/delete/revert to snapshot
   vmware_guest_snapshot:
     hostname: "{{ vmware_hostname }}"
     username: "{{ vm_user }}"
@@ -15,3 +31,23 @@
     snapshot_name: "{{ vm_snap_name }}"
     state: "{{ vm_snap_state }}"
   delegate_to: "{{ vmware_pyvmomi_hostname }}"
+  when: vm_snap_name is defined or vm_snap_state == "remove_all"
+- name: boot host if just reverted/created
+  vsphere_guest:
+    vcenter_hostname: "{{ vmware_hostname }}"
+    username: "{{ vm_user }}"
+    password: "{{ vm_pass }}"
+    guest:  "{{ ansible_hostname }}.{{ ansible_domain }}"
+    vm_extra_config:
+      folder: "{{ vmware_folder }}"
+    state: powered_on
+  when: vm_snap_state == "revert" or vm_snap_state == "present"
+  delegate_to: "{{ vmware_pyvmomi_hostname }}"
+- name: waiting for server to boot
+  wait_for:
+    host: "{{ inventory_hostname }}"
+    port: 22
+    delay: 1
+    timeout: 300
+  delegate_to: localhost
+  become: no
