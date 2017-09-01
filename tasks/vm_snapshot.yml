@@ -1,9 +1,13 @@
 ---
-- name: set auth and snap name
+- name: set auth
   set_fact:
     vm_pass: "{{ lookup('file', '~/Docs/.pass') }}"
-    vm_snap_name: "{{lookup('pipe','date +%Y%m%d%H%M%S')}}"
     vm_user: "{{ lookup('env','USER') }}@{{ ansible_domain }}"
+- name: set snap name
+  set_fact:
+    vm_snap_name: "{{lookup('pipe','date +%Y%m%d%H%M%S')}}"
+    when: vm_snap_name is undefined
+- debug: msg="vm_snap_name {{ vm_snap_name }}  state {{ vm_snap_state }}"
 - name: create/delete snapshot
   vmware_guest_snapshot:
     hostname: "{{ vmware_hostname }}"
@@ -15,3 +19,4 @@
     snapshot_name: "{{ vm_snap_name }}"
     state: "{{ vm_snap_state }}"
   delegate_to: "{{ vmware_pyvmomi_hostname }}"
+  when: vm_snap_name is defined or vm_snap_state == "remove_all"
