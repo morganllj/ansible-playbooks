@@ -37,14 +37,14 @@
         - "nobody      hard      nproc      16384"
       register: reboot
     - include: tasks/reboot.yml
-    - name: waiting for server to boot
-      local_action: 
-        module: wait_for
-        host: "{{ inventory_hostname }}"
-        port: 22
-        delay: 1
-        timeout: 300
-      become: no  # no need to sudo to wait on a host remotely 
+    # - name: waiting for server to boot
+    #   local_action: 
+    #     module: wait_for
+    #     host: "{{ inventory_hostname }}"
+    #     port: 22
+    #     delay: 1
+    #     timeout: 300
+    #   become: no  # no need to sudo to wait on a host remotely 
     - name: check if 389 DS is installed
       stat: path=/etc/dirsrv/slapd-{{ ansible_hostname }}
       register: installdir
