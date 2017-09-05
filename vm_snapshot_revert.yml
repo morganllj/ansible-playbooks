@@ -1,4 +1,4 @@
-# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) -e vm_snap_name=testsnap file.yml
+# ansible-playbook -C -i /path/to/hosts.yml -l hostname(s) -e vm_snap_name=testsnap vm_snapshot_revert.yml 
 
 ---
 - name: yum update

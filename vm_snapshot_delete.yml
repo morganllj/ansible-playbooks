@@ -1,4 +1,5 @@
-# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) -e vm_snap_name=testsnap vm_snapshot_delete.yml
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) vm_snapshot_delete.yml
 ---
 - name: yum update
   hosts: all
