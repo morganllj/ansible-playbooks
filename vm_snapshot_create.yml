@@ -2,7 +2,7 @@
 # ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) vm_snapshot_create.yml
 
 ---
-- name: yum update
+- name: create vmware snapshot(s)
   hosts: all
   become: yes
   become_user: root
