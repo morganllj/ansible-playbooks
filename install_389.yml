@@ -18,6 +18,16 @@
         state: present
     - name: install 389 packages
       yum: name=389-ds state=present
+    - name: enable directory
+      systemd:
+        name: dirsrv.target
+        enabled: yes
+      when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
+    - name: enable directory admin
+      systemd:
+        name: dirsrv-admin
+        enabled: yes
+      when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
     - name: set sysctl.conf
       sysctl:
         name: "{{ item.thing }}"
@@ -82,6 +92,7 @@
     - name: disable firewalld
       systemd:
         state: stopped
+        enabled: no
         name: firewalld.service
 
 - name: run 389 installer serially
@@ -102,10 +113,11 @@
       when: installdir.stat.exists is defined and installdir.stat.exists == False
       register: cat
     - debug: var=cat.stdout_lines
-#     - name: delete 389 install inf
-#       file:
-#         path: /var/tmp/389_{{ ansible_hostname }}.inf
-#         state: absent
+      when: cat.stdout_lines is defined
+    - name: delete 389 install inf
+      file:
+        path: /var/tmp/389_{{ ansible_hostname }}.inf
+        state: absent
 # copy schema files in place
 #
 #  - name: import users
