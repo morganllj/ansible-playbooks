@@ -2,7 +2,7 @@
 AdminDomain = {{ ansible_domain }}
 ConfigDirectoryAdminID = admin
 ConfigDirectoryAdminPwd = {{ admin_pw }}
-ConfigDirectoryLdapURL = ldap://{{ config_dir_host }}.{{ansible_domain}}:389/o=NetscapeRoot
+ConfigDirectoryLdapURL = ldap://{{ config_dir_host }}:389/o=NetscapeRoot
 FullMachineName = {{ ansible_fqdn }}
 ServerRoot = /usr/lib64/dirsrv
 StrictHostCheck = true

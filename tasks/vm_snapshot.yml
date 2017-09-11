@@ -2,7 +2,7 @@
 - name: set auth
   set_fact:
     vm_pass: "{{ lookup('file', '~/Docs/.pass') }}"
-    vm_user: "{{ lookup('env','USER') }}@{{ ansible_domain }}"
+    vm_user: "{{ lookup('env','USER') }}@{{ vmware_login_domain }}"
 - name: set snap name
   set_fact:
     vm_snap_name: "{{lookup('pipe','date +%Y%m%d%H%M%S')}}"
