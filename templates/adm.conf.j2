@@ -5,6 +5,6 @@ SuiteSpotGroup: dirsrv
 sysgroup: dirsrv
 userdn: uid=admin,ou=Administrators,ou=TopologyManagement,o=NetscapeRoot
 ldapStart: /usr/sbin/start-dirsrv devldap04
-ldapurl: ldap://{{ config_dir_host }}.{{ansible_domain }}:389/o=NetscapeRoot
+ldapurl: ldap://{{ config_dir_host }}:389/o=NetscapeRoot
 SuiteSpotUserID: dirsrv
 sie: cn=admin-serv-{{ ansible_hostname }},cn=389 Administration Server,cn=Server Group,cn={{ ansible_hostname }}.{{ ansible_domain }},ou={{ ansible_domain }},o=NetscapeRoot

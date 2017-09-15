@@ -76,8 +76,8 @@
         - "echo on"
         - "exit 0"
       when: installdir.stat.exists is defined and installdir.stat.exists == False
-    - name: set basedn
-      set_fact: basedn="dc={{ ansible_domain | regex_replace("\.", ",dc=") }}"
+    # - name: set basedn
+    #   set_fact: basedn="dc={{ ansible_domain | regex_replace("\.", ",dc=") }}"
     - name: set naming_value
       set_fact: naming_value="{{ ansible_domain | regex_replace("\..*", "") }}"
     - set_fact:
@@ -120,10 +120,6 @@
       register: cat
     - debug: var=cat.stdout_lines
       when: cat.stdout_lines is defined
-    - name: delete 389 install inf
-      file:
-        path: /var/tmp/389_{{ ansible_hostname }}.inf
-        state: absent
 
 - name: post install
   hosts: 389ldap
@@ -131,27 +127,12 @@
   become_user: root
   become_method: sudo
   tasks:
-    - name: delete 389 install inf
-      file:
-        path: /var/tmp/389_{{ ansible_hostname }}.inf
-        state: absent
+    # - name: delete 389 install inf
+    #   file:
+    #     path: /var/tmp/389_{{ ansible_hostname }}.inf
+    #     state: absent
     - name: create ssl password file
       template:
         src: templates/389_pin.txt.j2
         dest: /etc/dirsrv/slapd-{{ ansible_hostname }}/pin.txt
         mode: 0600
-    
-# copy schema files in place
-#
-#  - name: import users
-#    command: /usr/lib64/dirsrv/slapd-instance/ldif2db -n userRoot -i /home1/user/ldap1-userRoot.ldif
-#    async: 0
-#    poll: 0
-#    ignore_errors: true
-    
-#  - name: do something if in a group
-#    command: echo something here
-#    when: "{{ ansible_fqdn }} in dev_389_primary_masters"
-  # - name: do something else if in a group
-  #   command: echo something else here
-  #   when: "{{ ansible_fqdn }}" in 389devprimarymasters
