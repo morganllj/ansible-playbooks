@@ -135,10 +135,10 @@
   become_user: root
   become_method: sudo
   tasks:
-    # - name: delete 389 install inf
-    #   file:
-    #     path: /var/tmp/389_{{ ansible_hostname }}.inf
-    #     state: absent
+    - name: delete 389 install inf
+      file:
+        path: /var/tmp/389_{{ ansible_hostname }}.inf
+        state: absent
     - name: create ssl password file
       template:
         src: templates/389_pin.txt.j2
