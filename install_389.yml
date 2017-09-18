@@ -98,11 +98,6 @@
         src: templates/adm.conf.j2
         dest: /etc/dirsrv/admin-serv/adm.conf
       when: installdir.stat.exists is defined and installdir.stat.exists == False
-    - name: disable firewalld
-      systemd:
-        state: stopped
-        enabled: no
-        name: firewalld.service
 
 - name: run 389 installer serially
   hosts: 389ldap
