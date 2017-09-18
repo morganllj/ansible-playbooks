@@ -8,9 +8,10 @@
   become: yes
   become_user: root
   become_method: sudo
-#  serial: 1
   vars:
     use_existing_mc: 1
+    config_for_mc: no
+    config_admin_id: uid=admin,ou=Administrators,ou=TopologyManagement,o=NetscapeRoot
   tasks:
     - name: install epel packages
       yum:
@@ -76,14 +77,21 @@
         - "echo on"
         - "exit 0"
       when: installdir.stat.exists is defined and installdir.stat.exists == False
-    # - name: set basedn
-    #   set_fact: basedn="dc={{ ansible_domain | regex_replace("\.", ",dc=") }}"
-    - name: set naming_value
+    - name: set naming_value, used in install inf
       set_fact: naming_value="{{ ansible_domain | regex_replace("\..*", "") }}"
-    - set_fact:
-        current_fqdn= "{{ansible_hostname}}"."{{ansible_domain}}" 
-    - name: decide where to save config tree
+    - name: set current fqdn for conditonals below
+      set_fact:
+        current_fqdn: "{{ansible_hostname}}.{{ansible_domain}}"
+    - name: set current fqdn, used to set a few variables in install inf
       set_fact: use_existing_mc=0
+      when:
+        - current_fqdn == config_dir_host
+    - name: set config_for_mc, used in install inf
+      set_fact: config_for_mc=no
+      when:
+        - current_fqdn == config_dir_host
+    - name: set config_admin_id, used in install inf
+      set_fact: config_admin_id=admin
       when:
         - current_fqdn == config_dir_host
     - name: generate 389 install inf
