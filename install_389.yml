@@ -8,16 +8,30 @@
   become: yes
   become_user: root
   become_method: sudo
-#  serial: 1
   vars:
     use_existing_mc: 1
+    config_for_mc: no
   tasks:
     - name: install epel packages
       yum:
         name: epel-release
         state: present
+        update_cache: yes
     - name: install 389 packages
-      yum: name=389-ds state=present
+      yum:
+        name: 389-ds
+        state: present
+        update_cache: yes
+    - name: enable directory
+      systemd:
+        name: dirsrv.target
+        enabled: yes
+      when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
+    - name: enable directory admin
+      systemd:
+        name: dirsrv-admin
+        enabled: yes
+      when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
     - name: set sysctl.conf
       sysctl:
         name: "{{ item.thing }}"
@@ -37,14 +51,6 @@
         - "nobody      hard      nproc      16384"
       register: reboot
     - include: tasks/reboot.yml
-    - name: waiting for server to boot
-      local_action: 
-        module: wait_for
-        host: "{{ inventory_hostname }}"
-        port: 22
-        delay: 1
-        timeout: 300
-      become: no  # no need to sudo to wait on a host remotely 
     - name: check if 389 DS is installed
       stat: path=/etc/dirsrv/slapd-{{ ansible_hostname }}
       register: installdir
@@ -70,16 +76,27 @@
         - "echo on"
         - "exit 0"
       when: installdir.stat.exists is defined and installdir.stat.exists == False
-    - name: set basedn
-      set_fact: basedn="dc={{ ansible_domain | regex_replace("\.", ",dc=") }}"
-    - name: set naming_value
+    - name: set naming_value, used in install inf
       set_fact: naming_value="{{ ansible_domain | regex_replace("\..*", "") }}"
-    - name: decide where to save config tree
+    - name: set current fqdn for conditonals below
+      set_fact:
+        current_fqdn: "{{ansible_hostname}}.{{ansible_domain}}"
+    - name: set current fqdn, used to set a few variables in install inf
       set_fact: use_existing_mc=0
       when:
-        - ansible_hostname == config_dir_host
+        - current_fqdn == config_dir_host
+    - name: set config_for_mc, used in install inf
+      set_fact: config_for_mc=no
+      when:
+        - current_fqdn == config_dir_host
     - name: generate 389 install inf
-      template: src=templates/389_primary_master_setup.inf.j2 dest=/var/tmp/389_{{ ansible_hostname }}.inf mode=0700
+      template: src=templates/389_install.inf.j2 dest=/var/tmp/389_{{ ansible_hostname }}.inf mode=0600
+      when: installdir.stat.exists is defined and installdir.stat.exists == False
+      # if this is not here during a clean install with a .inf the installer will not install the configs on a central server
+    - name: generate adm.conf
+      template: 
+        src: templates/adm.conf.j2
+        dest: /etc/dirsrv/admin-serv/adm.conf
       when: installdir.stat.exists is defined and installdir.stat.exists == False
 
 - name: run 389 installer serially
@@ -100,21 +117,20 @@
       when: installdir.stat.exists is defined and installdir.stat.exists == False
       register: cat
     - debug: var=cat.stdout_lines
+      when: cat.stdout_lines is defined
+
+- name: post install
+  hosts: 389ldap
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
     - name: delete 389 install inf
       file:
         path: /var/tmp/389_{{ ansible_hostname }}.inf
         state: absent
-# copy schema files in place
-#
-#  - name: import users
-#    command: /usr/lib64/dirsrv/slapd-instance/ldif2db -n userRoot -i /home1/user/ldap1-userRoot.ldif
-#    async: 0
-#    poll: 0
-#    ignore_errors: true
-    
-#  - name: do something if in a group
-#    command: echo something here
-#    when: "{{ ansible_fqdn }} in dev_389_primary_masters"
-  # - name: do something else if in a group
-  #   command: echo something else here
-  #   when: "{{ ansible_fqdn }}" in 389devprimarymasters
+    - name: create ssl password file
+      template:
+        src: templates/389_pin.txt.j2
+        dest: /etc/dirsrv/slapd-{{ ansible_hostname }}/pin.txt
+        mode: 0600

@@ -1,0 +1,84 @@
+# run as: ansible-playbook -C -i /path/to/hosts.yml -l host(s) -e git_branch=branch install_slapd_watch.yml 
+#
+# assumes you have an [enterpriseldap] host group and variables defined most likely
+# in [enterpriseldap:vars] in your hosts file (-i above):
+#
+# [enterpriseldap:children]
+# host1
+# host2
+#
+# [enterpriseldap:vars]
+# script_file= "72org-schema.ldif"
+# local_git_location="/var/tmp"
+# git_ldap_util_dir="ssh://git.domain.org/git"
+# git_ldap_util_repo="org_ldap_cf"
+---
+- name: install slapd_watch script
+  hosts: enterpriseldap
+  become: yes
+  become_user: root
+  become_method: sudo
+  vars:
+    git_ldap_util_repo: "ldap_utils"
+    script_file: "slapd_watch.sh"
+  tasks:
+    - name: checkout repository containing script
+      git:
+        repo: "{{ git_ldap_cf_dir }}/{{ git_ldap_util_repo }}"
+        dest: "{{ local_git_location }}/{{ git_ldap_util_repo }}"
+        version: "{{ git_branch | default('master') }}"
+      become: no
+      run_once: true
+      register: repository_checked_out
+      check_mode: no
+      delegate_to: localhost
+    - name: make a local copy of the script
+      copy: 
+        backup: yes 
+        src: "{{ local_git_location }}/{{ git_ldap_util_repo}}/{{ script_file }}"
+        dest: "{{ local_git_location }}/{{ script_file }}"
+      delegate_to: localhost
+      become: no
+    - name: check that script file is available
+      local_action: stat path="{{ local_git_location }}/{{script_file }}"
+      register: scriptfile
+      become: no
+    - name: update email address
+      replace:
+        path:  "{{ local_git_location }}/{{ script_file }}"
+        regexp: "morgan@domain.org"
+        replace: "{{ notification_email_addr }}"
+      delegate_to: localhost
+      when: (scriptfile.stat.readable is defined and scriptfile.stat.readable == true)
+      become: no
+    - name: copy script into place on ldap server
+      copy: 
+        backup: yes
+        mode: 0700
+        src: "{{ local_git_location }}/{{ script_file }}"
+        dest: "/usr/local/sbin/{{ script_file }}"
+      register: script_updated
+      when: (scriptfile.stat.readable is defined and scriptfile.stat.readable == true)
+    - name: delete temp repository
+      file:
+        path: "{{ local_git_location }}/{{ git_ldap_util_repo}}"
+        state: absent
+      become: no
+      run_once: true
+      check_mode: no
+      delegate_to: localhost
+    - name: delete local copy of script
+      file:
+        path: "{{ local_git_location }}/{{ script_file }}"
+        state: absent
+      become: no
+      run_once: true
+      check_mode: no
+      delegate_to: localhost
+    - name: add cron job
+      cron:
+        hour: "*"
+        minute: "*/2"
+        user: root
+        job: /usr/local/sbin/{{ script_file }}
+        name: "slapd_watch"

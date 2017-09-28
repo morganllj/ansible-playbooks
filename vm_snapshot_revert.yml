@@ -1,0 +1,13 @@
+# ansible-playbook -C -i /path/to/hosts.yml -l hostname(s) -e vm_snap_name=testsnap vm_snapshot_revert.yml 
+
+---
+- name: revert to vmware snapshot(s)
+  hosts: all
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: set vm_snap_state to present
+      set_fact:
+        vm_snap_state: revert
+    - include: tasks/vm_snapshot.yml

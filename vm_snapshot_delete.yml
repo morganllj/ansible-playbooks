@@ -1,12 +1,13 @@
-# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) -e vm_snap_name=testsnap vm_snapshot_delete.yml
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) vm_snapshot_delete.yml
 ---
-- name: yum update
+- name: delete vmware snapshot(s)
   hosts: all
   become: yes
   become_user: root
   become_method: sudo
   tasks:
-    - name: set facts
+    - name: set vm_snap_state to remove_all
       set_fact:
-        vm_snap_state: remove_all
+        vm_snap_state: absent
     - include: tasks/vm_snapshot.yml

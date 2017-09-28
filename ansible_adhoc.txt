@@ -1,0 +1,2 @@
+ansible  --become -i hosts.yml host(s) -m systemd -a "name=firewalld state=stopped enabled=no"
+ansible  --become -i hosts.yml host(s) -m firewalld -a "immediate=yes permanent=yes rich_rule='rule family="ipv4" port port="9830" protocol="tcp" protocol="udp" accept' state=enabled"

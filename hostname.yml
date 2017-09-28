@@ -1,0 +1,14 @@
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
+# simple half-baked script used for a one-time server domain name change.  Replace "domain.net" with your domain
+---
+- name: set hostname
+  hosts: allhosts
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - debug:
+        msg: "hostname: {{ansible_hostname}}.domain.net"
+    - name: set hostname
+      hostname:
+        name: "{{ansible_hostname}}.domain.net"

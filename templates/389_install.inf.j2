@@ -1,19 +1,19 @@
 [General]
-AdminDomain = {{ ansible_domain }}
-ConfigDirectoryAdminID = uid=admin,ou=Administrators,ou=TopologyManagement,o=NetscapeRoot
+AdminDomain = {{ dir_admin_domain }}
+ConfigDirectoryAdminID = admin
 ConfigDirectoryAdminPwd = {{ admin_pw }}
-ConfigDirectoryLdapURL = ldap://{{ config_dir_host }}.{{ansible_domain}}:389/o=NetscapeRoot
+ConfigDirectoryLdapURL = ldap://{{ config_dir_host }}:389/o=NetscapeRoot
 FullMachineName = {{ ansible_fqdn }}
 ServerRoot = /usr/lib64/dirsrv
 StrictHostCheck = true
-SuiteSpotGroup = nobody
-SuiteSpotUserID = nobody
+SuiteSpotGroup = dirsrv
+SuiteSpotUserID = dirsrv
 [admin]
 Port = 9830
 ServerAdminID = admin
 ServerAdminPwd = {{ admin_pw }}
 ServerIpAddress = 0.0.0.0
-SysUser = nobody
+SysUser = dirsrv
 [slapd]
 AddOrgEntries = Yes
 AddSampleEntries = No
@@ -24,7 +24,8 @@ RootDN = cn=Directory Manager
 RootDNPwd = {{ dm_pw }}
 ServerIdentifier = {{ ansible_hostname }}
 ServerPort = 389
-Suffix = {{ basedn }}
+SlapdConfigForMC = {{ config_for_mc }}
+Suffix = {{ dir_basedn }}
 UseExistingMC = {{ use_existing_mc }}
 bak_dir = /var/lib/dirsrv/slapd-{{ ansible_hostname }}/bak
 bindir = /usr/bin
