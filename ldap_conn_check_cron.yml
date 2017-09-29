@@ -1,0 +1,20 @@
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
+---
+- name: install connection check cron job
+  hosts: enterpriseldap
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: install lsof
+      yum:
+        name: lsof
+        state: present
+        update_cache: yes
+    - name: add cron job
+      cron:
+        hour: 6,9,12,15,18
+        minute: 0
+        user: root
+        job: "(echo; date; /usr/sbin/lsof -i:389 -i:636 -n | awk '{print $9}'|cut -d '>' -f2| cut -d: -f1|sort -n | uniq) >> /var/tmp/`/bin/hostname`_conns.txt 2>&1"
+        name: "ldap_conn_check"
