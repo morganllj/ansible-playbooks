@@ -1,0 +1,26 @@
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
+---
+- name: check zimbra mta queues
+  hosts: zimbramtas
+  become: yes
+  become_user: zimbra
+  become_method: sudo
+  tasks:
+    - name: mailq
+      shell: /opt/zimbra/postfix/sbin/mailq
+      register: output
+    - debug: var=output.stdout_lines
+
+
+- name: check other mta queues
+  hosts: othermtas
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: mailq
+      shell: mailq
+      register: output
+    - debug: var=output.stdout_lines
+
+      
