@@ -16,7 +16,7 @@
   when: vm_snap_state == "present"
 - name: pause for server(s) to shut down
   pause:
-    seconds: 8
+    seconds: 60
   become: no
   delegate_to: localhost
   when: vm_snap_state == "present"
