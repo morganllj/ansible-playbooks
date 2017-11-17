@@ -1,0 +1,63 @@
+# Use traditional timestamp format
+$ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
+
+# Provides kernel logging support (previously done by rklogd)
+$ModLoad imklog
+# Provides support for local system logging (e.g. via logger command)
+$ModLoad imuxsock
+
+# Log all kernel messages to the console.
+# Logging much else clutters up the screen.
+#kern.*                                                 /dev/console
+
+# Log anything (except mail) of level info or higher.
+# Don't log private authentication messages!
+*.info;local0.none;local1.none;mail.none;auth.none;authpriv.none;cron.none                /var/log/messages
+
+# The authpriv file has restricted access.
+authpriv.*                                              /var/log/secure
+
+# Log all the mail messages in one place.
+mail.*                                                  -/var/log/maillog
+
+
+# Log cron stuff
+cron.*                                                  /var/log/cron
+
+# Everybody gets emergency messages
+*.emerg                                                 *
+
+# Save news errors of level crit and higher in a special file.
+uucp,news.crit                                          /var/log/spooler
+
+# Save boot messages also to boot.log
+local7.*                                                /var/log/boot.log
+
+# forward all to rsyslog
+*.*                                                     @rsyslog1-back
+*.*							@mailapp1-mgmt.domain.org
+
+local0.*                @mailapp.domain.org
+local1.*                @mailapp.domain.org
+auth.*                  @mailapp.domain.org
+local0.*                -/var/log/zimbra.log
+local1.*                -/var/log/zimbra-stats.log
+auth.*                  -/var/log/zimbra.log
+mail.*                @mailapp.domain.org
+mail.*                -/var/log/zimbra.log
+
+$ModLoad imfile
+$WorkDirectory  /var/log/rsyslogWorkDirectory
+
+# input(type="imfile"
+#       File="/opt/zimbra/log/mailbox.log"
+#       Tag="zimbramailbox"
+#       Facility="local6"
+#      Severity="info")
+$InputFileName /opt/zimbra/log/mailbox.log
+$InputFileTag zimbramailbox
+$InputFileStateFile stats_diraudit
+$InputFileSeverity info
+$InputFileFacility local6
+$InputRunFileMonitor
+
