@@ -1,3 +1,10 @@
+
+# THIS FILE IS MANAGED BY ANSIBLE--it comes from the ansible-playbooks
+# repository and will be overwritten the next time and update is made
+# from ansible.  The repository is here:
+# ssh://git.domain.net/export/git2repo/techops/ansible-playbooks
+
+
 # Use traditional timestamp format
 $ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
 
@@ -34,29 +41,23 @@ uucp,news.crit                                          /var/log/spooler
 local7.*                                                /var/log/boot.log
 
 # forward all to rsyslog
-*.*                                                     @rsyslog1-back
-*.*							@mailapp1-mgmt.domain.org
+*.*							@{{ rsyslog_server_back_ip }}
 
-local0.*                @mailapp.domain.org
-local1.*                @mailapp.domain.org
-auth.*                  @mailapp.domain.org
+local0.*                @{{ rsyslog_server_back_ip }}
+local1.*                @{{ rsyslog_server_back_ip }}
+auth.*                  @{{ rsyslog_server_back_ip }}
 local0.*                -/var/log/zimbra.log
 local1.*                -/var/log/zimbra-stats.log
 auth.*                  -/var/log/zimbra.log
-mail.*                @mailapp.domain.org
+mail.*                @{{ rsyslog_server_back_ip }}
 mail.*                -/var/log/zimbra.log
 
 $ModLoad imfile
-$WorkDirectory  /var/log/rsyslogWorkDirectory
+$WorkDirectory  {{ rsyslog_work_dir }}
 
-# input(type="imfile"
-#       File="/opt/zimbra/log/mailbox.log"
-#       Tag="zimbramailbox"
-#       Facility="local6"
-#      Severity="info")
 $InputFileName /opt/zimbra/log/mailbox.log
-$InputFileTag zimbramailbox
-$InputFileStateFile stats_diraudit
+$InputFileTag {{ zimbra_env_type }}zimbramailbox
+$InputFileStateFile stats_zimbramaibox
 $InputFileSeverity info
 $InputFileFacility local6
 $InputRunFileMonitor
