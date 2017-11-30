@@ -1,0 +1,40 @@
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
+---
+- name: centralize ldap logs
+  hosts: zimbra
+  become: yes
+  become_user: root
+  become_method: sudo
+  vars:
+    # be sure you have a :vars in your hosts.yml that sets ldap_env_type.  We use dev, test or "".
+    short_hostname: "{{ inventory_hostname | regex_replace('^([^.]*?)[.].*', '\\1') }}"
+    rsyslog_work_dir: "/var/log/rsyslogWorkDirectory"
+  tasks:
+    - name: create rsyslog working directory
+      file:
+        path: "{{ rsyslog_work_dir }}"
+        state: directory
+    - name: update client rsyslog.conf
+      template:
+        src: zimbra_rsyslog.conf.j2
+        dest: /etc/rsyslog.conf
+        mode: 0644
+        backup: yes
+      register: rsyslogconf_updated
+    - name: restart client rsyslog
+      service: name=rsyslog state=restarted
+      when: rsyslogconf_updated.changed
+    - name: update server rsyslog.conf
+      blockinfile:
+        dest: /etc/rsyslog.conf
+        backup: yes
+        block: |
+          :syslogtag, isequal, "{{ zimbra_env_type }}zimbramailbox" /var/mail_log/{{zimbra_env_type}}mailbox.log
+          &~
+        marker: "# {mark} ANSIBLE MANAGED BLOCK {{zimbra_env_type}}zimbra"
+      register: server_rsyslogconf_updated
+      delegate_to: "{{ rsyslog_server }}"
+    - name: restart server rsyslog
+      service: name=rsyslog state=restarted
+      when: server_rsyslogconf_updated.changed
+      delegate_to: "{{ rsyslog_server }}"

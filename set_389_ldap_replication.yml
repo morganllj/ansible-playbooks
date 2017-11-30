@@ -1,0 +1,60 @@
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
+# optionally:
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) -e object_state=absent file.yml
+#
+# ldap_entry won't modify an already existing ldap entry so if you
+# want to change something you have to run once with -e
+# object_state=absent and then again with out -e
+---
+- name: add replication manager
+  hosts: dev389ldap
+  tasks:
+    - name: create replication objects
+      ldap_entry:
+        state: "{{ object_state | default('present') }}"
+        bind_dn: "{{ ldap_bind_dn }}"
+        bind_pw: "{{ ldap_bind_pw }}"
+        server_uri: ldaps://{{ inventory_hostname }}
+        dn: cn=replication manager,cn=config
+        objectClass:
+          - inetorgperson
+          - person
+          - top
+          - organizationalPerson
+        attributes:
+          cn: "replication manager"
+          givenname: replication
+          sn: manager
+          userPassword: "{{ repl_mgr_pw }}"
+      delegate_to: localhost
+    - name: create changelogdb dir
+      file:
+        path: /var/lib/dirsrv/slapd-{{ ansible_hostname }}/changelogdb
+        state: directory
+        owner: dirsrv
+        group: dirsrv
+        mode: 0750
+      become: yes
+      become_user: root
+      become_method: sudo
+
+
+      #   - name: create replica
+      # ldap_entry:
+      #   state: "{{ object_state | default('present') }}"
+      #   bind_dn: "{{ ldap_bind_dn }}"
+      #   bind_pw: "{{ ldap_bind_pw }}"
+      #   server_uri: ldaps://{{ inventory_hostname }}
+      #   dn: cn=replica,cn=dc\3Ddomain\2Cdc\3Dorg,cn=mapping tree,cn=config
+      #   objectClass:
+      #     - nsDS5Replica
+      #     - top
+      #   attributes:
+      #     nsDS5ReplicaRoot: dc=domain,dc=org
+      #     nsDS5ReplicaType: 3
+      #     nsDS5Flags: 1
+      #     nsDS5ReplicaId: <id>
+      #     nsds5ReplicaPurgeDelay: 604800
+      #     nsDS5ReplicaBindDN: cn=replication manager,cn=config
+      #     cn: replica
+      # delegate_to: localhost      

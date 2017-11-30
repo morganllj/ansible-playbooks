@@ -1,4 +1,4 @@
-# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
+# ansible-playbook -i /path/to/ansible_hosts check_mta_queues.yml
 ---
 - name: check zimbra mta queues
   hosts: zimbramtas
