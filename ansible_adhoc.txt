@@ -3,3 +3,6 @@ ansible  --become -i hosts.yml host(s) -m firewalld -a "immediate=yes permanent=
 
 Get ip addresses for hosts:
 ansible -i hosts.yml -m setup host_list -a "filter=ansible_all_ipv4_addresses"|grep -v changed|grep -v ansible|egrep -v '\}'|sed 's/SUCCESS//'| sed 's/\|//' | sed 's/\=\>//' |perl -p -0135 -e "s/\s+/ /g;s/\]//; s/\{//; s/\"//g; s/\,//; s/\n/ /g;s/^\s+//; print \"\n\"" |sort
+
+list backup partitions:
+ansible -m shell --become --become-user=zimbra -a "ls -1 /opt/zimbra/backup/sessions|wc -l; df -h /opt/zimbra/backup/sessions" -i hosts.yml zimbrastores,zimbraarchivestore
