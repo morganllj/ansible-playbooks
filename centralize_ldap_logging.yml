@@ -1,7 +1,7 @@
 # ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
 ---
 - name: centralize ldap logs
-  hosts: centosldap
+  hosts: centosldap,389ldap
   become: yes
   become_user: root
   become_method: sudo
