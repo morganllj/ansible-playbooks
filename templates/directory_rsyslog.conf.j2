@@ -41,7 +41,7 @@ uucp,news.crit                                          /var/log/spooler
 local7.*                                                /var/log/boot.log
 
 # forward all to rsyslog
-*.* @{{ rsyslog_back_ip }}
+*.* @{{ rsyslog_server_back_ip }}
 
 $ModLoad imfile
 $WorkDirectory	{{ rsyslog_work_dir }}
