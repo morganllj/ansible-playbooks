@@ -1,4 +1,4 @@
-# ansible-playbook -i /path/to/directory_hosts -l ldap1.domain.net  install_389.yml
+# ansible-playbook -C -i /path/to/directory_hosts -l ldap1.domain.net  install_389.yml
 # for example:
 #     ansible-playbook -C -i ../sdp_ansible_cf/hosts.yml -l hostname  install_389.yml
 # if you want to reinstall, uninstall 389 on the host(s) first: ds_removal  -s ldap1 -w pass 
@@ -134,3 +134,12 @@
         src: templates/389_pin.txt.j2
         dest: /etc/dirsrv/slapd-{{ ansible_hostname }}/pin.txt
         mode: 0600
+        owner: dirsrv
+        group: dirsrv
+    - name: create changelogdb
+      file:
+        path: /var/lib/dirsrv/slapd-{{ ansible_hostname }}/changelogdb
+        state: directory
+        mode: 0755
+        owner: dirsrv
+        group: dirsrv
