@@ -19,7 +19,7 @@ $ModLoad imuxsock
 
 # Log anything (except mail) of level info or higher.
 # Don't log private authentication messages!
-*.info;local0.none;local1.none;mail.none;auth.none;authpriv.none;cron.none                /var/log/messages
+*.info;local0.none;local1.none;mail.none;auth.none;authpriv.none;cron.none;local6.none /var/log/messages
 
 # The authpriv file has restricted access.
 authpriv.*                                              /var/log/secure
