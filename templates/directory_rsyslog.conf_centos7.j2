@@ -1,0 +1,77 @@
+
+# THIS FILE IS MANAGED BY ANSIBLE--it comes from the ansible-playbooks
+# repository and will be overwritten the next time and update is made
+# from ansible.  The repository is here:
+# ssh://git.domain.net/export/git2repo/techops/ansible-playbooks
+
+# Use traditional timestamp format
+$ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
+
+# Provides kernel logging support (previously done by rklogd)
+#$ModLoad imklog
+module(load="imklog")
+
+# Provides support for local system logging (e.g. via logger command)
+#$ModLoad imuxsock
+module(load="imuxsock")
+
+# imput file
+#$ModLoad imfile
+module(load="imfile")
+
+#### 4.1.6 of Nessus scan
+#$ModLoad imtcp.so
+module(load="imtcp.so")
+$InputTCPServerRun 514 
+
+# Log all kernel messages to the console.
+# Logging much else clutters up the screen.
+#kern.*                                                 /dev/console
+
+# Log anything (except mail) of level info or higher.
+# Don't log private authentication messages!
+*.info;mail.none;authpriv.none;cron.none;local5.none                /var/log/messages
+
+# The authpriv file has restricted access.
+authpriv.*                                              /var/log/secure
+
+# Log all the mail messages in one place.
+mail.*                                                  -/var/log/maillog
+
+
+# Log cron stuff
+cron.*                                                  /var/log/cron
+
+# Everybody gets emergency messages
+# *.emerg                                                 *
+
+# Save news errors of level crit and higher in a special file.
+uucp,news.crit                                          /var/log/spooler
+
+# Save boot messages also to boot.log
+local7.*                                                /var/log/boot.log
+
+# forward all to rsyslog
+*.* @{{ rsyslog_server_back_ip }}
+
+$ModLoad imfile
+$WorkDirectory	{{ rsyslog_work_dir }}
+
+input(type="imfile"
+      File="/var/log/dirsrv/slapd-{{ short_hostname }}/access"
+      Tag="{{ ldap_env_type }}diraccess"
+      Facility="local5"
+      Severity="info")
+
+input(type="imfile"
+      File="/var/log/dirsrv/slapd-{{ short_hostname }}/errors"
+      Tag="{{ ldap_env_type }}direrrors"
+      Facility="local5"
+      Severity="info")
+
+input(type="imfile"
+      File="/var/log/dirsrv/slapd-{{ short_hostname }}/audit"
+      Tag="{{ ldap_env_type }}diraudit"
+      Facility="local5"
+      Severity="info")
+

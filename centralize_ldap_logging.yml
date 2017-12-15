@@ -10,17 +10,30 @@
     short_hostname: "{{ inventory_hostname | regex_replace('^([^.]*?)[.].*', '\\1') }}"
     rsyslog_work_dir: "/var/log/rsyslogWorkDirectory"
   tasks:
+    - name: install a recent version of rsyslog
+      yum:
+        name: rsyslog
+        state: present
     - name: create rsyslog working directory
       file:
         path: "{{ rsyslog_work_dir }}"
         state: directory
-    - name: update client rsyslog.conf
+    - name: update client rsyslog.conf if centos 5
       template:
         src: directory_rsyslog.conf.j2
         dest: /etc/rsyslog.conf
         mode: 0644
         backup: yes
       register: rsyslogconf_updated
+      when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "5"
+    - name: update client rsyslog.conf if centos 7
+      template:
+        src: directory_rsyslog.conf_centos7.j2
+        dest: /etc/rsyslog.conf
+        mode: 0644
+        backup: yes
+      register: rsyslogconf_updated
+      when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
     - name: restart client rsyslog
       service: name=rsyslog state=restarted
       when: rsyslogconf_updated.changed
