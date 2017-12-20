@@ -37,9 +37,9 @@
       dest: "/etc/dirsrv/slapd-{{ ansible_hostname }}/schema/{{ schema_file }}"
     register: schema_updated
     when: (schemafile.stat.readable is defined and schemafile.stat.readable == true)
-  - name: restart slapd if centos 5
+  - name: restart slapd if centos 5 or 6
     service: name=dirsrv state=restarted
-    when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "5" and schema_updated.changed
+    when: ansible_distribution == "CentOS" and ( ansible_distribution_major_version == "5" or ansible_distribution_major_version == "6" )  and schema_updated.changed
   - name: restart slapd if centos 7
     systemd: name=dirsrv@{{ ansible_hostname }} state=restarted
     when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7" and schema_updated.changed
