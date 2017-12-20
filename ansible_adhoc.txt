@@ -6,3 +6,9 @@ ansible -i hosts.yml -m setup host_list -a "filter=ansible_all_ipv4_addresses"|g
 
 list backup partitions:
 ansible -m shell --become --become-user=zimbra -a "ls -1 /opt/zimbra/backup/sessions|wc -l; df -h /opt/zimbra/backup/sessions" -i hosts.yml zimbrastores,zimbraarchivestore
+
+create a remote directory:
+ansible --become-user zimbra --become -m file -i hosts.yml -a "path=/opt/zimbra/mailboxd/webapps/zimbra/skins/carbon/logos state=directory" zimbrastores,zimbraarchivestores
+
+copy a local file to remote host(s):
+ansible --become-user zimbra --become -m copy -i hosts.yml -a "dest=/opt/zimbra/mailboxd/webapps/zimbra/skins/carbon/logos src=/Users/morgan/Desktop/LoginBanner.png" zimbrastores,zimbraarchivestores
