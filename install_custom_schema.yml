@@ -29,7 +29,7 @@
     service: name=dirsrv state=restarted
     when: ansible_distribution == "CentOS" and ( ansible_distribution_major_version == "5" or ansible_distribution_major_version == "6" )  and schema_updated.changed
   - name: restart slapd if centos 7
-    systemd: name=dirsrv@{{ ansible_hostname }} state=restarted
+    systemd: name=dirsrv.target state=restarted
     when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7" and schema_updated.changed
   - name: delete temp repository
     local_action:
