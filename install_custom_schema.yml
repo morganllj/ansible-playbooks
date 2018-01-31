@@ -1,4 +1,4 @@
-# run as: ansible-playbook -C -i /path/to/hosts.yml -l host(s) -e git_branch=branch install_custom_schema.yml 
+# run as: ansible-playbook -C -i /path/to/hosts.yml -l host(s) -e "schema_file=filename git_branch=branch" install_custom_schema.yml 
 #
 ---
 - name: install custom schema
