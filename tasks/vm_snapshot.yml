@@ -30,6 +30,7 @@
     datacenter: "{{ vmware_datacenter }}"
     snapshot_name: "{{ vm_snap_name }}"
     state: "{{ vm_snap_state }}"
+    validate_certs: no
   delegate_to: "{{ vmware_pyvmomi_hostname }}"
   when: vm_snap_name is defined or vm_snap_state == "remove_all"
 - name: boot host if just reverted/created
@@ -40,6 +41,7 @@
     guest:  "{{ ansible_hostname }}.{{ ansible_domain }}"
     vm_extra_config:
       folder: "{{ vmware_folder }}"
+    validate_certs: no
     state: powered_on
   when: vm_snap_state == "revert" or vm_snap_state == "present"
   delegate_to: "{{ vmware_pyvmomi_hostname }}"

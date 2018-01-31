@@ -1,17 +1,5 @@
 # run as: ansible-playbook -C -i /path/to/hosts.yml -l host(s) -e git_branch=branch install_custom_schema.yml 
 #
-# assumes you have an [enterpriseldap] host group and variables defined most likely
-# in [enterpriseldap:vars] in your hosts file (-i above):
-#
-# [enterpriseldap:children]
-# host1
-# host2
-#
-# [enterpriseldap:vars]
-# schema_file= "72org-schema.ldif"
-# local_git_location="/var/tmp"
-# git_ldap_cf_dir="ssh://git.domain.org/git"
-# git_ldap_cf_repo="org_ldap_cf"
 ---
 - name: install custom schema
   hosts: enterpriseldap
@@ -41,7 +29,7 @@
     service: name=dirsrv state=restarted
     when: ansible_distribution == "CentOS" and ( ansible_distribution_major_version == "5" or ansible_distribution_major_version == "6" )  and schema_updated.changed
   - name: restart slapd if centos 7
-    systemd: name=dirsrv@{{ ansible_hostname }} state=restarted
+    systemd: name=dirsrv.target state=restarted
     when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7" and schema_updated.changed
   - name: delete temp repository
     local_action:
@@ -49,7 +37,3 @@
     become: no
     run_once: true
     check_mode: no
-#   
-# - name: Display all variables/facts known for a host
-#   debug:
-#     var: hostvars[inventory_hostname]
