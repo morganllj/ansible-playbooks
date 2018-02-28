@@ -1,0 +1,11 @@
+# ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
+---
+- name: reboot
+  hosts: allhosts
+  become: yes
+  become_user: root
+  become_method: sudo
+  vars:
+    manualreboot: 1
+  tasks:
+    - include: tasks/reboot.yml
