@@ -40,17 +40,9 @@ uucp,news.crit                                          /var/log/spooler
 # Save boot messages also to boot.log
 local7.*                                                /var/log/boot.log
 
-# forward all to rsyslog
+# forward all to rsyslog and greylog
 *.*							@{{ rsyslog_server_back_ip }}
-
-local0.*                @{{ rsyslog_server_back_ip }}
-local1.*                @{{ rsyslog_server_back_ip }}
-auth.*                  @{{ rsyslog_server_back_ip }}
-local0.*                -/var/log/zimbra.log
-local1.*                -/var/log/zimbra-stats.log
-auth.*                  -/var/log/zimbra.log
-mail.*                @{{ rsyslog_server_back_ip }}
-mail.*                -/var/log/zimbra.log
+*.*							@@{{ greylog_server_back_ip }}:{{ greylog_server_port }}
 
 $ModLoad imfile
 $WorkDirectory  {{ rsyslog_work_dir }}
