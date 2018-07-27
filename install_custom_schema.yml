@@ -14,14 +14,18 @@
     run_once: true
     register: repository_checked_out
     check_mode: no
-  - name: check that schema file is available
-    local_action: stat path="{{ local_git_location }}/{{git_ldap_cf_repo}}/{{schema_file }}"
+  - name: register location of schema file
+    local_action: stat path="{{ local_git_location }}/{{git_ldap_cf_repo}}/ds/schema/{{schema_file }}"
     register: schemafile
     become: no
+  - name: delete legacy schema file if present
+    file:
+      state: absent
+      path: "/etc/dirsrv/slapd-{{ ansible_hostname }}/schema/{{ legacy_schema_file }}"
   - name: copy schema file into place on directory server
     copy: 
       backup: yes 
-      src: "{{ local_git_location }}/{{ git_ldap_cf_repo}}/{{ schema_file }}"
+      src: "{{ local_git_location }}/{{ git_ldap_cf_repo}}/ds/schema/{{ schema_file }}"
       dest: "/etc/dirsrv/slapd-{{ ansible_hostname }}/schema/{{ schema_file }}"
     register: schema_updated
     when: (schemafile.stat.readable is defined and schemafile.stat.readable == true)
