@@ -34,15 +34,14 @@
   delegate_to: "{{ vmware_pyvmomi_hostname }}"
   when: vm_snap_name is defined or vm_snap_state == "remove_all"
 - name: boot host if just reverted/created
-  vsphere_guest:
-    vcenter_hostname: "{{ vmware_hostname }}"
+  vmware_guest:
     username: "{{ vm_user }}"
     password: "{{ vm_pass }}"
-    guest:  "{{ ansible_hostname }}.{{ ansible_domain }}"
-    vm_extra_config:
-      folder: "{{ vmware_folder }}"
+    name:  "{{ ansible_hostname }}.{{ ansible_domain }}"
+    hostname: "{{ vmware_hostname }}"
+    folder: "{{ vmware_folder }}"
     validate_certs: no
-    state: powered_on
+    state: poweredon
   when: vm_snap_state == "revert" or vm_snap_state == "present"
   delegate_to: "{{ vmware_pyvmomi_hostname }}"
 - name: waiting for server to boot
