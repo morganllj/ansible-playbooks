@@ -1,6 +1,6 @@
 # ansible-playbook -C -i /path/to/ansible_hosts -l hostname(s) file.yml
 ---
-- name: delete all vmware snashot(s)
+- name: delete all vmware snapshot(s)
   hosts: all
   become: yes
   become_user: root
